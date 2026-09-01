@@ -1,0 +1,26 @@
+node_modules/
+.env
+.env.local
+.auth/
+
+# Playwright artifacts
+test-results/
+playwright-report/
+reports/html/
+reports/playwright-results.json
+reports/playwright-results.partial.json
+reports/search-ui-playwright-results.json
+reports/search-ui-summary.json
+reports/search-ui-summary.md
+reports/analytics-*.json
+reports/analytics-failures.md
+reports/*.log
+reports/traces/
+blob-report/
+playwright/.cache/
+
+# OS / IDE
+.DS_Store
+*.log
+.idea/
+.vscode/

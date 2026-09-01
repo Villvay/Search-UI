@@ -1,0 +1,36 @@
+{
+  "name": "search-ui-automation",
+  "version": "1.0.0",
+  "description": "Playwright + TypeScript UI automation framework for Search UI",
+  "private": true,
+  "scripts": {
+    "test": "playwright test tests/framework-validation.spec.ts --project=desktop-1440",
+    "test:headed": "playwright test tests/framework-validation.spec.ts --project=desktop-1440 --headed",
+    "test:debug": "playwright test tests/framework-validation.spec.ts --project=desktop-1440 --debug",
+    "test:clean": "node scripts/clean-test-artifacts.mjs",
+    "test:report": "node -e \"const fs=require('fs');const p='reports/html/index.html';if(!fs.existsSync(p)){console.error('Missing '+p);process.exit(1);} console.log('Report: '+require('path').resolve(p));\" && open reports/html/index.html",
+    "test:summary": "node scripts/generate-search-ui-report.mjs && node scripts/generate-search-ui-html.mjs",
+    "test:search-ui": "node scripts/run-search-ui.mjs",
+    "test:desktop": "playwright test --project=desktop-1440 --project=desktop-1280",
+    "test:desktop-1440:browsers": "playwright test --project=desktop-1440-chrome --project=desktop-1440-firefox --project=desktop-1440-safari",
+    "test:analytics:desktop-1440:browsers": "node scripts/run-analytics.mjs --project=desktop-1440-chrome --project=desktop-1440-firefox --project=desktop-1440-safari",
+    "test:tablet": "playwright test --project=tablet-1024 --project=tablet-768",
+    "test:mobile": "playwright test --project=mobile-390 --project=mobile-375",
+    "test:responsive": "playwright test",
+    "test:on-type": "playwright test src/modules/on-type/tests/on-type.spec.ts",
+    "test:suggestions": "playwright test src/modules/suggestions/tests/suggestions.spec.ts",
+    "test:on-enter": "playwright test src/modules/on-enter/tests/on-enter.spec.ts",
+    "test:related-searches": "playwright test src/modules/related-searches/tests",
+    "test:analytics": "node scripts/run-analytics.mjs",
+    "test:analytics:on-type": "playwright test src/modules/on-type/tests/on-type-analytics.spec.ts",
+    "test:analytics:suggestions": "playwright test src/modules/suggestions/tests/suggestions-analytics.spec.ts",
+    "test:analytics:on-enter": "playwright test src/modules/on-enter/tests/on-enter-analytics.spec.ts",
+    "test:analytics:report": "node scripts/generate-analytics-report.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "@types/node": "^22.10.0",
+    "dotenv": "^16.4.7",
+    "typescript": "^5.7.2"
+  }
+}
