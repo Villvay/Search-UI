@@ -52,15 +52,27 @@ export class OnEnterSearchPage {
   /**
    * Types a query (dropdown may open) and submits with Enter.
    * This is normal Enter search — not suggestion selection.
+   * Use `inputMode: 'fill'` for analytics (not keystroke/debounce coverage).
    */
-  async searchWithEnter(query: string): Promise<void> {
+  async searchWithEnter(
+    query: string,
+    options?: { inputMode?: 'type' | 'fill' },
+  ): Promise<void> {
+    const inputMode = options?.inputMode ?? 'type';
     await this.focusSearch();
     if (query.length === 0) {
       await this.clearQuery();
+    } else if (inputMode === 'fill') {
+      await this.enterQuery(query);
     } else {
       await this.typeQuerySequentially(query);
     }
     await this.submitSearchWithEnter();
+  }
+
+  /** Return to storefront home so the next analytics query starts cleanly. */
+  async resetToHome(): Promise<void> {
+    await this.open();
   }
 
   getSearchUrl(): string {

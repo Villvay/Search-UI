@@ -1,5 +1,9 @@
 /**
- * Analytics suite runner: sequential modules, conservative disk use, merged JSON + reports.
+ * Analytics suite runner: merged JSON + reports.
+ *
+ * Default: one Playwright invocation for all analytics modules (modules can
+ * run in parallel up to ANALYTICS_WORKERS). Set ANALYTICS_SEQUENTIAL=1 to
+ * run modules one-at-a-time and clear test-results between each (low disk).
  */
 import { spawnSync } from 'child_process';
 import fs from 'fs';
@@ -9,6 +13,7 @@ import { fileURLToPath } from 'url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const archivedJson = path.join(root, 'reports', 'analytics-playwright-results.json');
 const tempJson = path.join(root, 'reports', 'playwright-results.partial.json');
+const latestJson = path.join(root, 'reports', 'playwright-results.json');
 
 const SUITES = [
   'src/modules/on-type/tests/on-type-analytics.spec.ts',
@@ -36,21 +41,111 @@ function cleanTestResultsOnly() {
   fs.mkdirSync(dir, { recursive: true });
 }
 
+function resolveWorkers() {
+  const raw = (process.env.ANALYTICS_WORKERS || '1').trim();
+  const n = Number.parseInt(raw, 10);
+  if (![1, 2, 3, 4].includes(n)) {
+    throw new Error(
+      `Invalid ANALYTICS_WORKERS="${raw}". Allowed: 1, 2, 3, 4 (default 1).`,
+    );
+  }
+  return String(n);
+}
+
 const clean = run('node', ['scripts/clean-test-artifacts.mjs']);
 if (clean.status !== 0) process.exit(clean.status ?? 1);
 
+const rawArgs = process.argv.slice(2);
+const smokeRequested = rawArgs.includes('--smoke');
+const extraArgs = rawArgs.filter((a) => a !== '--smoke');
+
+if (smokeRequested) {
+  process.env.ANALYTICS_PROFILE = process.env.ANALYTICS_PROFILE || 'smoke';
+  if (!process.env.ANALYTICS_WORKERS) {
+    process.env.ANALYTICS_WORKERS = '3';
+  }
+}
+
 fs.mkdirSync(path.join(root, 'reports'), { recursive: true });
 
-const merged = { config: null, suites: [], errors: [], stats: null };
-let worstStatus = 0;
-const extraArgs = process.argv.slice(2);
-const workers = process.env.ANALYTICS_WORKERS || '1';
+const workers = resolveWorkers();
 const retries =
   process.env.ANALYTICS_RETRIES !== undefined
     ? ['--retries', process.env.ANALYTICS_RETRIES]
     : ['--retries', '0'];
+const sequential =
+  (process.env.ANALYTICS_SEQUENTIAL || '').trim() === '1' ||
+  (process.env.ANALYTICS_SEQUENTIAL || '').trim().toLowerCase() === 'true';
 
-for (const suite of SUITES) {
+if (smokeRequested) {
+  console.log(
+    `Analytics smoke profile: ${loadSmokeCountHint()} queries × 3 modules (ANALYTICS_WORKERS=${workers})`,
+  );
+}
+
+function loadSmokeCountHint() {
+  try {
+    const ids = JSON.parse(
+      fs.readFileSync(
+        path.join(root, 'src/test-data/analytics/smoke-query-ids.json'),
+        'utf8',
+      ),
+    ).ids;
+    return Array.isArray(ids) ? ids.length : '?';
+  } catch {
+    return '?';
+  }
+}
+
+const playwrightEnv = {
+  ...process.env,
+  PLAYWRIGHT_BROWSERS_PATH:
+    process.env.PLAYWRIGHT_BROWSERS_PATH ||
+    path.join(process.env.HOME || '', 'Library/Caches/ms-playwright'),
+  SEARCH_UI_JSON: 'reports/playwright-results.partial.json',
+  PLAYWRIGHT_HTML_OPEN: 'never',
+};
+
+let worstStatus = 0;
+const merged = { config: null, suites: [], errors: [], stats: null };
+
+function ingestPartial() {
+  if (!fs.existsSync(tempJson)) {
+    console.error('Missing partial Playwright JSON for analytics run');
+    worstStatus = worstStatus || 1;
+    return;
+  }
+  const partial = JSON.parse(fs.readFileSync(tempJson, 'utf8'));
+  if (!merged.config) merged.config = partial.config;
+  if (Array.isArray(partial.suites)) merged.suites.push(...partial.suites);
+  if (Array.isArray(partial.errors)) merged.errors.push(...partial.errors);
+}
+
+if (sequential) {
+  for (const suite of SUITES) {
+    cleanTestResultsOnly();
+    if (fs.existsSync(tempJson)) fs.rmSync(tempJson, { force: true });
+
+    const result = run(
+      'npx',
+      [
+        'playwright',
+        'test',
+        suite,
+        '--workers',
+        workers,
+        ...retries,
+        ...extraArgs,
+      ],
+      playwrightEnv,
+    );
+
+    if (typeof result.status === 'number' && result.status > worstStatus) {
+      worstStatus = result.status;
+    }
+    ingestPartial();
+  }
+} else {
   cleanTestResultsOnly();
   if (fs.existsSync(tempJson)) fs.rmSync(tempJson, { force: true });
 
@@ -59,40 +154,23 @@ for (const suite of SUITES) {
     [
       'playwright',
       'test',
-      suite,
+      ...SUITES,
       '--workers',
       workers,
       ...retries,
       ...extraArgs,
     ],
-    {
-      ...process.env,
-      PLAYWRIGHT_BROWSERS_PATH:
-        process.env.PLAYWRIGHT_BROWSERS_PATH ||
-        path.join(process.env.HOME || '', 'Library/Caches/ms-playwright'),
-      SEARCH_UI_JSON: 'reports/playwright-results.partial.json',
-      PLAYWRIGHT_HTML_OPEN: 'never',
-    },
+    playwrightEnv,
   );
 
   if (typeof result.status === 'number' && result.status > worstStatus) {
     worstStatus = result.status;
   }
-
-  if (!fs.existsSync(tempJson)) {
-    console.error(`Missing partial JSON for ${suite}`);
-    worstStatus = worstStatus || 1;
-    continue;
-  }
-
-  const partial = JSON.parse(fs.readFileSync(tempJson, 'utf8'));
-  if (!merged.config) merged.config = partial.config;
-  if (Array.isArray(partial.suites)) merged.suites.push(...partial.suites);
-  if (Array.isArray(partial.errors)) merged.errors.push(...partial.errors);
+  ingestPartial();
 }
 
 fs.writeFileSync(archivedJson, JSON.stringify(merged, null, 2));
-fs.copyFileSync(archivedJson, path.join(root, 'reports', 'playwright-results.json'));
+fs.copyFileSync(archivedJson, latestJson);
 if (fs.existsSync(tempJson)) fs.rmSync(tempJson, { force: true });
 console.log(`\nArchived analytics JSON: ${path.relative(root, archivedJson)}`);
 

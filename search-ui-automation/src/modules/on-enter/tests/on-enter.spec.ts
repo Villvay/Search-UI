@@ -13,10 +13,10 @@ import { OnEnterSearchPage } from '../pages/OnEnterSearchPage';
  * ON-ENTER module — normal Enter-key search execution only.
  * Does not import on-type or suggestions modules.
  */
-test.describe('On-enter search', () => {
+test.describe('On-enter search @responsive', () => {
   test.describe.configure({ mode: 'parallel' });
 
-  test('ENTER-001 - Valid query executes search on Enter', async ({
+  test('ENTER-001 @smoke - Valid query executes search on Enter', async ({
     page,
   }) => {
     const onEnter = new OnEnterSearchPage(page);
@@ -25,7 +25,7 @@ test.describe('On-enter search', () => {
     await expectOnSearchResultsPage(onEnter, onEnterQueries.validProduct.value);
   });
 
-  test('ENTER-002 - Search URL contains submitted query', async ({ page }) => {
+  test('ENTER-002 @smoke - Search URL contains submitted query', async ({ page }) => {
     const onEnter = new OnEnterSearchPage(page);
     await onEnter.open();
     await onEnter.searchWithEnter(onEnterQueries.validProductType.value);

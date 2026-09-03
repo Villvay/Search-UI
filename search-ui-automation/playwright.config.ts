@@ -6,9 +6,10 @@ import {
   getVercelBypassHeaders,
 } from './config/environments';
 import {
-  DESKTOP_1440_BROWSERS,
+  DESKTOP_1440_EXTRA_BROWSERS,
   VIEWPORTS,
   getViewportById,
+  isSafariIncluded,
 } from './config/viewports';
 
 dotenv.config({ path: path.resolve(__dirname, '.env') });
@@ -16,6 +17,7 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
 const environment = getEnvironmentConfig();
 const bypassHeaders = getVercelBypassHeaders();
 const desktop1440 = getViewportById('desktop-1440');
+const includeSafari = isSafariIncluded();
 
 /** Other viewports stay Chromium-only (original project names preserved). */
 const otherViewportProjects = VIEWPORTS.filter((v) => v.id !== 'desktop-1440').map(
@@ -29,20 +31,11 @@ const otherViewportProjects = VIEWPORTS.filter((v) => v.id !== 'desktop-1440').m
   }),
 );
 
-/** desktop-1440 × Chrome / Firefox / Safari (WebKit). */
-const desktop1440BrowserProjects = DESKTOP_1440_BROWSERS.map((browser) => ({
-  name: browser.projectName,
-  use: {
-    ...devices[browser.deviceKey],
-    browserName: browser.browserName,
-    viewport: { width: desktop1440.width, height: desktop1440.height },
-  },
-}));
-
 /**
- * Backward-compatible alias: --project=desktop-1440 → Chrome/Chromium @ 1440×900.
+ * Canonical desktop 1440 Chromium project.
+ * (Previously duplicated as desktop-1440-chrome — removed.)
  */
-const desktop1440Alias = {
+const desktop1440Chromium = {
   name: 'desktop-1440',
   use: {
     ...devices['Desktop Chrome'],
@@ -50,6 +43,18 @@ const desktop1440Alias = {
     viewport: { width: desktop1440.width, height: desktop1440.height },
   },
 };
+
+/** desktop-1440 × Firefox (+ Safari when INCLUDE_SAFARI=1). */
+const desktop1440ExtraBrowserProjects = DESKTOP_1440_EXTRA_BROWSERS.filter(
+  (browser) => !browser.requiresIncludeSafari || includeSafari,
+).map((browser) => ({
+  name: browser.projectName,
+  use: {
+    ...devices[browser.deviceKey],
+    browserName: browser.browserName,
+    viewport: { width: desktop1440.width, height: desktop1440.height },
+  },
+}));
 
 export default defineConfig({
   testDir: '.',
@@ -91,18 +96,21 @@ export default defineConfig({
   outputDir: 'test-results',
   use: {
     baseURL: environment.baseURL,
-    // Full-suite runs (SEARCH_UI_JSON set) keep screenshots/traces off to avoid
-    // ENOSPC on constrained disks. Module-level commands still capture them.
+    // Full-suite / analytics JSON runs keep screenshots/traces off to save disk.
+    // FORCE_FAILURE_SCREENSHOTS=1 keeps only-on-failure PNGs during JSON shard runs.
     trace: process.env.SEARCH_UI_JSON ? 'off' : 'on-first-retry',
-    screenshot: process.env.SEARCH_UI_JSON ? 'off' : 'only-on-failure',
+    screenshot:
+      process.env.SEARCH_UI_JSON && !process.env.FORCE_FAILURE_SCREENSHOTS
+        ? 'off'
+        : 'only-on-failure',
     video: 'off',
     actionTimeout: 15_000,
     navigationTimeout: 45_000,
     extraHTTPHeaders: bypassHeaders,
   },
   projects: [
-    desktop1440Alias,
-    ...desktop1440BrowserProjects,
+    desktop1440Chromium,
+    ...desktop1440ExtraBrowserProjects,
     ...otherViewportProjects,
   ],
 });

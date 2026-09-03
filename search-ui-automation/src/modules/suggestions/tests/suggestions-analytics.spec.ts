@@ -7,17 +7,17 @@ import { SUGGESTIONS_BEHAVIOR } from '../data/behavior';
 import { SuggestionsPage } from '../pages/SuggestionsPage';
 
 /**
- * Analytics-driven SUGGESTIONS coverage.
- * Requires suggestion count > 0 for queries meeting min character threshold.
+ * Analytics-driven SUGGESTIONS coverage (@analytics).
+ * Uses fill() for query entry (not keystroke/debounce coverage).
  */
 const analyticsQueries = loadAnalyticsQueries();
 
-test.describe('SUGGESTIONS analytics queries', () => {
+test.describe('SUGGESTIONS analytics queries @analytics', () => {
   test.describe.configure({ mode: 'parallel' });
 
   for (const item of analyticsQueries) {
     const titleQuery = truncateQueryForTitle(item.query);
-    test(`${item.id} - SUGGESTIONS - "${titleQuery}"`, async ({
+    test(`${item.id} - SUGGESTIONS - "${titleQuery}" @analytics`, async ({
       page,
     }, testInfo) => {
       testInfo.annotations.push(
@@ -32,7 +32,7 @@ test.describe('SUGGESTIONS analytics queries', () => {
       const trimmed = item.query.trim();
       if (trimmed.length < SUGGESTIONS_BEHAVIOR.minCharacters) {
         await suggestions.focusSearch();
-        await suggestions.typeQuerySequentially(item.query);
+        await suggestions.enterQuery(item.query);
         await expect(suggestions.input()).toHaveValue(item.query);
         testInfo.annotations.push(
           { type: 'suggestionCount', description: '0' },
@@ -45,7 +45,9 @@ test.describe('SUGGESTIONS analytics queries', () => {
         return;
       }
 
-      await suggestions.searchAndWaitForSuggestions(item.query);
+      await suggestions.searchAndWaitForSuggestions(item.query, {
+        inputMode: 'fill',
+      });
       await expect(suggestions.input()).toHaveValue(item.query);
 
       const emptyVisible = await suggestions

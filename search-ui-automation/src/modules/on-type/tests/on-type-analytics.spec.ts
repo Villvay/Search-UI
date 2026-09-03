@@ -7,17 +7,19 @@ import { ON_TYPE_BEHAVIOR, ON_TYPE_COPY } from '../data/behavior';
 import { OnTypeSearchPage } from '../pages/OnTypeSearchPage';
 
 /**
- * Analytics-driven ON-TYPE coverage.
- * Uses shared src/test-data/analytics — does not import other feature modules.
+ * Analytics-driven ON-TYPE coverage (@analytics).
+ * Uses fill() (not keystroke typing). Functional ON-TYPE specs keep sequential typing.
  */
 const analyticsQueries = loadAnalyticsQueries();
 
-test.describe('ON-TYPE analytics queries', () => {
+test.describe('ON-TYPE analytics queries @analytics', () => {
   test.describe.configure({ mode: 'parallel' });
 
   for (const item of analyticsQueries) {
     const titleQuery = truncateQueryForTitle(item.query);
-    test(`${item.id} - ON-TYPE - "${titleQuery}"`, async ({ page }, testInfo) => {
+    test(`${item.id} - ON-TYPE - "${titleQuery}" @analytics`, async ({
+      page,
+    }, testInfo) => {
       testInfo.annotations.push(
         { type: 'analyticsId', description: item.id },
         { type: 'analyticsModule', description: 'on-type' },
@@ -27,7 +29,7 @@ test.describe('ON-TYPE analytics queries', () => {
       const onType = new OnTypeSearchPage(page);
       await onType.open();
       await onType.focusSearch();
-      await onType.typeQuerySequentially(item.query);
+      await onType.typeQuery(item.query);
 
       await expect(onType.input()).toHaveValue(item.query);
 
@@ -39,7 +41,6 @@ test.describe('ON-TYPE analytics queries', () => {
         return;
       }
 
-      // Handled = active columns OR empty-suggestion messaging (no crash / stuck idle).
       await expect
         .poll(
           async () => {

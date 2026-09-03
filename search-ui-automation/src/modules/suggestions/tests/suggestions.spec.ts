@@ -22,10 +22,10 @@ import { SuggestionsPage } from '../pages/SuggestionsPage';
  * SUGGESTIONS / DROPDOWN module.
  * Does not import on-type. Does not cover Enter-key search submission.
  */
-test.describe('Search dropdown and suggestions', () => {
+test.describe('Search dropdown and suggestions @responsive', () => {
   test.describe.configure({ mode: 'parallel' });
 
-  test('SUG-001 - Empty search displays trending dropdown', async ({
+  test('SUG-001 @smoke - Empty search displays trending dropdown', async ({
     page,
   }) => {
     const suggestions = new SuggestionsPage(page);
@@ -40,7 +40,7 @@ test.describe('Search dropdown and suggestions', () => {
     expect(trendingCount).toBeGreaterThan(0);
   });
 
-  test('SUG-002 - Valid query displays suggestions', async ({ page }) => {
+  test('SUG-002 @smoke - Valid query displays suggestions', async ({ page }) => {
     const suggestions = new SuggestionsPage(page);
     await suggestions.open();
     await suggestions.searchAndWaitForSuggestions(suggestionCases.productType.query);

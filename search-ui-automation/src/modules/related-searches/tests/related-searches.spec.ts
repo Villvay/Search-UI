@@ -18,7 +18,7 @@ import { RelatedSearchesPage } from '../pages/RelatedSearchesPage';
  * RELATED SEARCHES — suggestions dropdown surface only.
  * Does not import on-type, suggestions, or on-enter modules.
  */
-test.describe('Related Searches', () => {
+test.describe('Related Searches @responsive', () => {
   test.describe.configure({ mode: 'parallel' });
 
   test('REL-001 - Related Searches are displayed', async ({ page }) => {

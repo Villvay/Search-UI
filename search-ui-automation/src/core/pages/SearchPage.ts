@@ -38,7 +38,7 @@ export class SearchPage extends BasePage {
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       await this.goto(env.homePath);
-      await this.waitForNetworkIdle();
+      // Prefer search-input readiness over broad networkidle (SPAs stay chatty).
 
       const blockedEarly = await checkpoint()
         .isVisible()
@@ -99,7 +99,6 @@ export class SearchPage extends BasePage {
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       await this.goto(path);
-      await this.waitForNetworkIdle();
 
       const blockedEarly = await checkpoint()
         .isVisible()

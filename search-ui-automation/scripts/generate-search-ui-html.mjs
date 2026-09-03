@@ -22,7 +22,7 @@ const dataJson = JSON.stringify(summary).replace(/</g, '\\u003c');
 const clientJs = `
 const DATA = ${dataJson};
 
-const MODULE_ORDER = ['FRAMEWORK', 'ON-TYPE', 'SUGGESTIONS', 'ON-ENTER', 'RELATED SEARCHES', 'ON-TYPE ANALYTICS', 'SUGGESTIONS ANALYTICS', 'ON-ENTER ANALYTICS'];
+const MODULE_ORDER = ['FRAMEWORK', 'ON-TYPE', 'SUGGESTIONS', 'ON-ENTER', 'RELATED SEARCHES', 'FILTERS & FACETS', 'SORTING', 'ON-TYPE ANALYTICS', 'SUGGESTIONS ANALYTICS', 'ON-ENTER ANALYTICS'];
 const VIEWPORT_ORDER = ['desktop-1440', 'desktop-1440-chrome', 'desktop-1440-firefox', 'desktop-1440-safari', 'desktop-1280', 'tablet-1024', 'tablet-768', 'mobile-390', 'mobile-375'];
 
 function esc(s) {

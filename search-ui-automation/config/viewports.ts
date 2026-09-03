@@ -2,7 +2,7 @@
  * Reusable viewport definitions for responsive Search UI testing.
  *
  * Playwright projects in playwright.config.ts map to these entries.
- * Desktop-1440 also expands across Chrome, Firefox, and Safari (WebKit).
+ * Desktop-1440 expands across Chromium (canonical), Firefox, and opt-in Safari.
  */
 
 export type ViewportCategory = 'desktop' | 'tablet' | 'mobile';
@@ -25,19 +25,18 @@ export const VIEWPORTS: readonly ViewportDefinition[] = [
   { id: 'mobile-375', category: 'mobile', width: 375, height: 812 },
 ] as const;
 
-/** Browsers used for the desktop-1440 multi-browser matrix. */
-export const DESKTOP_1440_BROWSERS: readonly {
+/**
+ * Extra desktop-1440 browser projects (Firefox always; Safari when INCLUDE_SAFARI=1).
+ * Canonical Chromium @ 1440×900 is project `desktop-1440` (not duplicated here).
+ */
+export const DESKTOP_1440_EXTRA_BROWSERS: readonly {
   id: BrowserId;
   projectName: string;
-  deviceKey: 'Desktop Chrome' | 'Desktop Firefox' | 'Desktop Safari';
-  browserName: 'chromium' | 'firefox' | 'webkit';
+  deviceKey: 'Desktop Firefox' | 'Desktop Safari';
+  browserName: 'firefox' | 'webkit';
+  /** When true, project is only registered if INCLUDE_SAFARI=1. */
+  requiresIncludeSafari?: boolean;
 }[] = [
-  {
-    id: 'chrome',
-    projectName: 'desktop-1440-chrome',
-    deviceKey: 'Desktop Chrome',
-    browserName: 'chromium',
-  },
   {
     id: 'firefox',
     projectName: 'desktop-1440-firefox',
@@ -49,12 +48,21 @@ export const DESKTOP_1440_BROWSERS: readonly {
     projectName: 'desktop-1440-safari',
     deviceKey: 'Desktop Safari',
     browserName: 'webkit',
+    requiresIncludeSafari: true,
   },
 ] as const;
 
-export const DESKTOP_1440_BROWSER_PROJECTS = DESKTOP_1440_BROWSERS.map(
+/** @deprecated Use DESKTOP_1440_EXTRA_BROWSERS — chrome is no longer duplicated. */
+export const DESKTOP_1440_BROWSERS = DESKTOP_1440_EXTRA_BROWSERS;
+
+export const DESKTOP_1440_BROWSER_PROJECTS = DESKTOP_1440_EXTRA_BROWSERS.map(
   (b) => b.projectName,
 );
+
+export function isSafariIncluded(): boolean {
+  const raw = (process.env.INCLUDE_SAFARI || '').trim().toLowerCase();
+  return raw === '1' || raw === 'true' || raw === 'yes';
+}
 
 export function getViewportsByCategory(
   category: ViewportCategory,

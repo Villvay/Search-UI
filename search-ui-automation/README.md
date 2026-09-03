@@ -2,7 +2,7 @@
 
 Playwright + TypeScript framework for automating the Würth Baer Supply **Search UI** across desktop, tablet, and mobile viewports.
 
-This repository currently contains **Step 1 — framework foundation** only. Search feature suites (on-type, on-enter, suggestions, filters, facets, results, etc.) are intentionally not implemented yet.
+This repository contains a Playwright + TypeScript Search UI automation framework with modular feature suites (on-type, suggestions, on-enter, related-searches), analytics coverage, and fast execution profiles.
 
 ## Target application
 
@@ -59,7 +59,9 @@ Defined in `config/viewports.ts` and wired as Playwright projects:
 
 | Project | Size | Category |
 |---|---|---|
-| `desktop-1440` | 1440 × 900 | Desktop |
+| `desktop-1440` | 1440 × 900 | Desktop (canonical Chromium) |
+| `desktop-1440-firefox` | 1440 × 900 | Desktop Firefox |
+| `desktop-1440-safari` | 1440 × 900 | Desktop Safari/WebKit — **only when `INCLUDE_SAFARI=1`** |
 | `desktop-1280` | 1280 × 800 | Desktop |
 | `tablet-1024` | 1024 × 768 | Tablet |
 | `tablet-768` | 768 × 1024 | Tablet |
@@ -92,24 +94,84 @@ search-ui-automation/
 
 ## How to run tests
 
+### Execution profiles (fast path)
+
+| Profile | Command | Scope |
+|---|---|---|
+| **Smoke** | `npm run test:smoke` | Chromium `desktop-1440`, `@smoke` critical paths (ON-TYPE / SUGGESTIONS / ON-ENTER) |
+| **Analytics smoke** | `npm run test:analytics:smoke` | Chromium `desktop-1440`, **15** representative queries from the full analytics dataset × 3 modules |
+| **Full analytics** | `npm run test:analytics` | Chromium `desktop-1440`, **complete** analytics dataset (currently Non-SKU top **50**) × 3 modules |
+| **Batched analytics** | `npm run test:analytics:batched` | New SKU/Non-SKU top-50 dataset (**200** rows); **Browser/Viewport → all queries × 3 modules** on one page before next viewport |
+
+Recommended tiers:
+
+```text
+PR       → npm run test:smoke
+Daily    → npm run test:analytics:smoke
+Nightly  → npm run test:nightly   # @responsive + @analytics across configured projects
+Release  → npm run test:search-ui + Firefox (test:desktop-1440:browsers)
+Safari   → INCLUDE_SAFARI=1 … (opt-in only)
+```
+
+### Tags
+
+```bash
+npx playwright test --project=desktop-1440 --grep @smoke
+npx playwright test --project=desktop-1440 --grep @analytics
+npx playwright test --grep @responsive
+```
+
+### Environment variables
+
+| Variable | Purpose |
+|---|---|
+| `INCLUDE_SAFARI=1` | Register `desktop-1440-safari` (WebKit). **Off by default** — QA Vercel checkpoint blocks WebKit. |
+| `ANALYTICS_WORKERS=1..4` | Parallel workers for analytics runner (default `1`; smoke defaults to `3`). For **batched**, shards by **viewport/project**, not by query. |
+| `ANALYTICS_DATASET` | `default` / `queries-50` (existing) or `top50-sku-nonsku` (new PDF dataset; batched default) |
+| `ANALYTICS_MODULES` | Batched module filter: `on-type`, `suggestions`, `on-enter` (comma-separated; default all three) |
+| `ANALYTICS_PROFILE=smoke` | Use the fixed 15-ID subset from `smoke-query-ids.json` (same dataset file) |
+| `ANALYTICS_LIMIT` / `ANALYTICS_IDS` | Optional filters on top of the profile |
+| `ANALYTICS_CATEGORY` / `ANALYTICS_LIST` | Optional filters on the new SKU/Non-SKU dataset |
+| `ANALYTICS_SEQUENTIAL=1` | Run analytics modules one-by-one (lower disk use; legacy runner only) |
+| `SKU_DATASET` | Path to SKU list JSON `{ "skus": [...] }` or catalog NDJSON for `npm run test:sku-plp` |
+| `SKU_LIMIT` | Cap unique SKUs loaded from the dataset |
+| `SKU_CACHE_SEQUENCES=0` | Disable A→B→C→A sequence expansion (run file order only) |
+| `ENV` / `BASE_URL` / `VERCEL_AUTOMATION_BYPASS_SECRET` | Target app + protection bypass |
+
+Examples:
+
+```bash
+INCLUDE_SAFARI=1 npm run test
+ANALYTICS_WORKERS=2 npm run test:analytics
+ANALYTICS_WORKERS=4 npm run test:analytics:smoke
+
+# Viewport-batched (new dataset): one page per viewport runs all queries
+ANALYTICS_WORKERS=1 npm run test:analytics:batched -- --project=desktop-1440
+ANALYTICS_WORKERS=2 npm run test:analytics:batched
+```
+
+Safari is **not** included in normal runs (`npm run test`, full suite, analytics). Chromium and Firefox projects remain available; Firefox is used by `test:desktop-1440:browsers`.
+
+Canonical desktop Chromium project is **`desktop-1440`** (1440×900). The former duplicate `desktop-1440-chrome` project was removed.
+
+### Module and suite commands
+
 ```bash
 # Default: framework validation on desktop 1440×900
 npm run test
 
-# On-type search module (all configured viewport projects)
+# On-type / suggestions / on-enter / related-searches modules
 npm run test:on-type
-
-# Suggestions / dropdown module
 npm run test:suggestions
-
-# On-enter search module
 npm run test:on-enter
-
-# Related Searches module
 npm run test:related-searches
+npm run test:filters
+npm run test:filters:responsive
+npm run test:sorting
+npm run test:sorting:responsive
+npm run test:sku-plp
 
-# Full Search UI suite (all feature modules + framework validation × all viewports)
-# Cleans artifacts, runs tests, writes HTML + JSON + Markdown summary
+# Full Search UI suite (feature modules + framework validation × viewports)
 npm run test:search-ui
 
 # Open last HTML report / regenerate summary from latest JSON
@@ -127,33 +189,30 @@ npm run test:debug
 npm run test:desktop      # 1440×900 + 1280×800
 npm run test:tablet       # 1024×768 + 768×1024
 npm run test:mobile       # 390×844 + 375×812
-npm run test:responsive   # all specs × all viewports
+npm run test:responsive   # specs tagged @responsive
 ```
 
 Examples:
 
 ```bash
-ENV=qa npm run test:on-type
-ENV=qa npm run test:suggestions
-ENV=qa npm run test:on-enter
-ENV=qa npm run test:related-searches
+ENV=qa npm run test:smoke
+ENV=qa npm run test:analytics:smoke
+ENV=qa npm run test:analytics
+ENV=qa ANALYTICS_WORKERS=2 npm run test:analytics
+ENV=qa INCLUDE_SAFARI=1 npm run test:on-type -- --project=desktop-1440-safari
 ENV=qa npm run test:search-ui
-ENV=qa npm run test:summary
-ENV=qa npm run test:related-searches -- --project=desktop-1440
-ENV=qa npm run test:related-searches -- --project=mobile-390
-ENV=qa npm run test:on-enter -- --project=desktop-1440
-ENV=qa npm run test:on-enter -- --project=mobile-390
-ENV=qa npm run test:suggestions -- --project=desktop-1440
-ENV=qa npm run test:suggestions -- --project=mobile-390
-ENV=qa npm run test:desktop
-ENV=qa npm run test:mobile
+ENV=qa npm run test:sku-plp
+SKU_LIMIT=5 ENV=qa npm run test:sku-plp
 ```
+
+Runtime before/after measurements for the fast profiles live in [`reports/runtime-comparison.md`](./reports/runtime-comparison.md).
 
 ## Reporting
 
 - Consolidated HTML: `reports/html/index.html` (`npm run test:report`)
 - Machine-readable results: `reports/search-ui-playwright-results.json` (full suite archive)
 - Consolidated summary: `reports/search-ui-summary.md` + `reports/search-ui-summary.json` (`npm run test:summary`)
+- SKU → PLP cache: `reports/sku-plp/sku_search_results.json` + `.md` (`npm run test:sku-plp`)
 - Failure screenshots/traces: captured on **module-level** runs (`screenshot: only-on-failure`, `trace: on-first-retry`)
 - Full-suite runs disable screenshots/traces to avoid disk exhaustion (`ENOSPC`)
 
@@ -243,4 +302,6 @@ Included:
 Not included (later steps):
 
 - Filters, facets, sorting, pagination, results UI regression
-- Analytics / semantic search modules
+- SKU analytics dataset (add when provided — do not invent queries)
+
+Analytics (Non-SKU top 50) and execution profiles (`test:smoke`, `test:analytics:smoke`, `test:analytics`) are included — see **Execution profiles** above.

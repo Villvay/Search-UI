@@ -25,6 +25,8 @@ const SUITES = [
   'src/modules/suggestions/tests',
   'src/modules/on-enter/tests',
   'src/modules/related-searches/tests',
+  'src/modules/filters-facets/tests',
+  'src/modules/sorting/tests',
   'tests/framework-validation.spec.ts',
 ];
 

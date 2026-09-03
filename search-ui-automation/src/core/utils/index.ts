@@ -17,10 +17,16 @@ export {
 
 export {
   expectedAnalyticsQueryCount,
+  getActiveAnalyticsDatasetPath,
   getAnalyticsQueryById,
   loadAllAnalyticsQueries,
   loadAnalyticsDataset,
   loadAnalyticsQueries,
+  loadAnalyticsSmokeIds,
+  normalizeAnalyticsQueryKey,
+  parseAnalyticsModules,
+  summarizeAnalyticsDataset,
   truncateQueryForTitle,
+  type AnalyticsModuleId,
   type AnalyticsQuery,
 } from './analyticsQueryLoader';

@@ -11,17 +11,17 @@ import {
 } from '../pages/OnEnterSearchPage';
 
 /**
- * Analytics-driven ON-ENTER coverage.
- * Fail when SERP has zero products or product titles do not include the query.
+ * Analytics-driven ON-ENTER coverage (@analytics).
+ * Uses fill() for query entry (not keystroke coverage).
  */
 const analyticsQueries = loadAnalyticsQueries();
 
-test.describe('ON-ENTER analytics queries', () => {
+test.describe('ON-ENTER analytics queries @analytics', () => {
   test.describe.configure({ mode: 'parallel' });
 
   for (const item of analyticsQueries) {
     const titleQuery = truncateQueryForTitle(item.query);
-    test(`${item.id} - ON-ENTER - "${titleQuery}"`, async ({
+    test(`${item.id} - ON-ENTER - "${titleQuery}" @analytics`, async ({
       page,
     }, testInfo) => {
       testInfo.annotations.push(
@@ -32,7 +32,7 @@ test.describe('ON-ENTER analytics queries', () => {
 
       const onEnter = new OnEnterSearchPage(page);
       await onEnter.open();
-      await onEnter.searchWithEnter(item.query);
+      await onEnter.searchWithEnter(item.query, { inputMode: 'fill' });
       await onEnter.waitForSearchNavigation(item.query);
 
       const landedUrl = page.url();
@@ -58,7 +58,10 @@ test.describe('ON-ENTER analytics queries', () => {
 
       testInfo.annotations.push(
         { type: 'productCount', description: String(productCount) },
-        { type: 'productTitlesSample', description: titles.slice(0, 3).join(' | ') },
+        {
+          type: 'productTitlesSample',
+          description: titles.slice(0, 3).join(' | '),
+        },
       );
     });
   }

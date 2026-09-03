@@ -66,6 +66,17 @@ export class OnTypeSearchPage {
     await this.searchPage.searchBox.clear();
   }
 
+  /** Clear input and wait for idle trending (safe between analytics queries). */
+  async resetSearchState(): Promise<void> {
+    await this.clearQuery();
+    await this.trendingHeading()
+      .waitFor({
+        state: 'visible',
+        timeout: ON_TYPE_BEHAVIOR.uiSettleTimeoutMs,
+      })
+      .catch(() => undefined);
+  }
+
   async readQuery(): Promise<string> {
     return this.searchPage.searchBox.getValue();
   }

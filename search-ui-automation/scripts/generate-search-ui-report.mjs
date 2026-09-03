@@ -22,6 +22,8 @@ const MODULE_ORDER = [
   'SUGGESTIONS',
   'ON-ENTER',
   'RELATED SEARCHES',
+  'FILTERS & FACETS',
+  'SORTING',
   'ON-TYPE ANALYTICS',
   'SUGGESTIONS ANALYTICS',
   'ON-ENTER ANALYTICS',
@@ -33,6 +35,8 @@ const FUNCTIONAL_MODULES = [
   'SUGGESTIONS',
   'ON-ENTER',
   'RELATED SEARCHES',
+  'FILTERS & FACETS',
+  'SORTING',
 ];
 
 const ANALYTICS_MODULES = [
@@ -65,6 +69,8 @@ function moduleFromFile(file = '') {
   if (normalized.includes('/modules/suggestions/')) return 'SUGGESTIONS';
   if (normalized.includes('/modules/on-enter/')) return 'ON-ENTER';
   if (normalized.includes('/modules/related-searches/')) return 'RELATED SEARCHES';
+  if (normalized.includes('/modules/filters-facets/')) return 'FILTERS & FACETS';
+  if (normalized.includes('/modules/sorting/')) return 'SORTING';
   if (normalized.includes('framework-validation')) return 'FRAMEWORK';
   return 'OTHER';
 }
@@ -73,7 +79,7 @@ function extractTestId(title = '') {
   const analytics = title.match(/^(AN-Q\d+)\b/i);
   if (analytics) return analytics[1].toUpperCase();
   const match = title.match(
-    /^((?:ON-TYPE|SUG|ENTER|REL|FW)-\d+)\b/i,
+    /^((?:ON-TYPE|SUG|ENTER|REL|FILTER|SORT|FW)-\d+)\b/i,
   );
   if (match) return match[1].toUpperCase().replace('ON-TYPE', 'ON-TYPE');
   const m2 = title.match(/^([A-Z]+-\d+)\b/i);

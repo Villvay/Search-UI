@@ -17,10 +17,10 @@ import { OnTypeSearchPage } from '../pages/OnTypeSearchPage';
  * ON-TYPE module — validates typing-driven search UI state only.
  * Suggestion ranking/selection belongs to a future SUGGESTIONS module.
  */
-test.describe('On-type search', () => {
+test.describe('On-type search @responsive', () => {
   test.describe.configure({ mode: 'parallel' });
 
-  test('ON-TYPE-001 - Search responds to minimum query length', async ({
+  test('ON-TYPE-001 @smoke - Search responds to minimum query length', async ({
     page,
   }) => {
     const onType = new OnTypeSearchPage(page);
@@ -72,7 +72,7 @@ test.describe('On-type search', () => {
     }
   });
 
-  test('ON-TYPE-003 - Clearing query resets on-type state', async ({
+  test('ON-TYPE-003 @smoke - Clearing query resets on-type state', async ({
     page,
   }) => {
     const onType = new OnTypeSearchPage(page);

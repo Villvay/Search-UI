@@ -61,14 +61,25 @@ export class SuggestionsPage {
     await this.searchPage.searchBox.clear();
   }
 
+  /** Clear input and wait for trending idle state between analytics queries. */
+  async resetSearchState(): Promise<void> {
+    await this.clearQuery();
+    await this.waitForIdleTrending().catch(() => undefined);
+  }
+
   async readQuery(): Promise<string> {
     return this.searchPage.searchBox.getValue();
   }
 
   /**
-   * Types a query and waits for suggestions via network response + UI state.
+   * Enters a query and waits for suggestions via network response + UI state.
+   * `fill` is for analytics (fast); `type` preserves keystroke/debounce behavior.
    */
-  async searchAndWaitForSuggestions(query: string): Promise<void> {
+  async searchAndWaitForSuggestions(
+    query: string,
+    options?: { inputMode?: 'type' | 'fill' },
+  ): Promise<void> {
+    const inputMode = options?.inputMode ?? 'type';
     await this.focusSearch();
 
     const responsePromise = this.page
@@ -89,7 +100,11 @@ export class SuggestionsPage {
       )
       .catch(() => null);
 
-    await this.typeQuerySequentially(query);
+    if (inputMode === 'fill') {
+      await this.enterQuery(query);
+    } else {
+      await this.typeQuerySequentially(query);
+    }
     await responsePromise;
     await this.dropdown.waitForSuggestions(SUGGESTIONS_BEHAVIOR.uiSettleTimeoutMs);
   }

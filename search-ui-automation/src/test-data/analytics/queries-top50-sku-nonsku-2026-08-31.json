@@ -1,0 +1,1926 @@
+{
+  "source": "top50_queries_sku_nonsku_2026-08-31.pdf",
+  "label": "Top 50 SKU + Non-SKU (searches + clicks lists)",
+  "providedAt": "2026-08-31",
+  "recordCount": 200,
+  "notes": "Exact query text from PDF. Four ranked lists preserved; duplicate query strings across lists retained. Existing queries-50.json unchanged.",
+  "stats": {
+    "total": 200,
+    "uniqueExact": 136,
+    "uniqueCaseInsensitive": 131,
+    "exactDuplicateOccurrences": 64,
+    "caseInsensitiveDuplicateOccurrences": 69,
+    "categories": [
+      "non-sku",
+      "sku"
+    ],
+    "lists": [
+      "non-sku-by-searches",
+      "non-sku-by-clicks",
+      "sku-by-searches",
+      "sku-by-clicks"
+    ]
+  },
+  "queries": [
+    {
+      "id": "AN-NSF001",
+      "query": "closet rod",
+      "searchCount": 991,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 1
+    },
+    {
+      "id": "AN-NSF002",
+      "query": "Rev-A-Shelf Corporation",
+      "searchCount": 932,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 2
+    },
+    {
+      "id": "AN-NSF003",
+      "query": "mdf",
+      "searchCount": 586,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 3
+    },
+    {
+      "id": "AN-NSF004",
+      "query": "plywood",
+      "searchCount": 465,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 4
+    },
+    {
+      "id": "AN-NSF005",
+      "query": "lazy susan",
+      "searchCount": 442,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 5
+    },
+    {
+      "id": "AN-NSF006",
+      "query": "formica",
+      "searchCount": 419,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 6
+    },
+    {
+      "id": "AN-NSF007",
+      "query": "blum hinges",
+      "searchCount": 397,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 7
+    },
+    {
+      "id": "AN-NSF008",
+      "query": "blum",
+      "searchCount": 393,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 8
+    },
+    {
+      "id": "AN-NSF009",
+      "query": "screws",
+      "searchCount": 365,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 9
+    },
+    {
+      "id": "AN-NSF010",
+      "query": "hamper",
+      "searchCount": 360,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 10
+    },
+    {
+      "id": "AN-NSF011",
+      "query": "trash pullout",
+      "searchCount": 348,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 11
+    },
+    {
+      "id": "AN-NSF012",
+      "query": "rev-a-shelf",
+      "searchCount": 346,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 12
+    },
+    {
+      "id": "AN-NSF013",
+      "query": "amerock",
+      "searchCount": 345,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 13
+    },
+    {
+      "id": "AN-NSF014",
+      "query": "bar pull",
+      "searchCount": 341,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 14
+    },
+    {
+      "id": "AN-NSF015",
+      "query": "shelf pins",
+      "searchCount": 340,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 15
+    },
+    {
+      "id": "AN-NSF016",
+      "query": "lemans",
+      "searchCount": 334,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 16
+    },
+    {
+      "id": "AN-NSF017",
+      "query": "melamine",
+      "searchCount": 324,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 17
+    },
+    {
+      "id": "AN-NSF018",
+      "query": "piano hinge",
+      "searchCount": 324,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 18
+    },
+    {
+      "id": "AN-NSF019",
+      "query": "olympus lock 1-3/4\" Cam #326",
+      "searchCount": 323,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 19
+    },
+    {
+      "id": "AN-NSF020",
+      "query": "hinges",
+      "searchCount": 322,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 20
+    },
+    {
+      "id": "AN-NSF021",
+      "query": "tafisa",
+      "searchCount": 318,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 21
+    },
+    {
+      "id": "AN-NSF022",
+      "query": "laminate",
+      "searchCount": 312,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 22
+    },
+    {
+      "id": "AN-NSF023",
+      "query": "grommet",
+      "searchCount": 308,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 23
+    },
+    {
+      "id": "AN-NSF024",
+      "query": "Kessebohmer USA Inc",
+      "searchCount": 300,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 24
+    },
+    {
+      "id": "AN-NSF025",
+      "query": "butcher block",
+      "searchCount": 295,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 25
+    },
+    {
+      "id": "AN-NSF026",
+      "query": "MDF",
+      "searchCount": 282,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 26
+    },
+    {
+      "id": "AN-NSF027",
+      "query": "edgebanding",
+      "searchCount": 280,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 27
+    },
+    {
+      "id": "AN-NSF028",
+      "query": "pocket door",
+      "searchCount": 274,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 28
+    },
+    {
+      "id": "AN-NSF029",
+      "query": "movento",
+      "searchCount": 258,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 29
+    },
+    {
+      "id": "AN-NSF030",
+      "query": "karran",
+      "searchCount": 257,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 30
+    },
+    {
+      "id": "AN-NSF031",
+      "query": "drawer slides",
+      "searchCount": 255,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 31
+    },
+    {
+      "id": "AN-NSF032",
+      "query": "mixer lift",
+      "searchCount": 252,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 32
+    },
+    {
+      "id": "AN-NSF033",
+      "query": "trash",
+      "searchCount": 248,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 33
+    },
+    {
+      "id": "AN-NSF034",
+      "query": "coat hook",
+      "searchCount": 246,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 34
+    },
+    {
+      "id": "AN-NSF035",
+      "query": "wire pull",
+      "searchCount": 246,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 35
+    },
+    {
+      "id": "AN-NSF036",
+      "query": "pulls",
+      "searchCount": 244,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 36
+    },
+    {
+      "id": "AN-NSF037",
+      "query": "contact adhesive",
+      "searchCount": 222,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 37
+    },
+    {
+      "id": "AN-NSF038",
+      "query": "edge banding",
+      "searchCount": 222,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 38
+    },
+    {
+      "id": "AN-NSF039",
+      "query": "Plywood",
+      "searchCount": 220,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 39
+    },
+    {
+      "id": "AN-NSF040",
+      "query": "edge pull",
+      "searchCount": 214,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 40
+    },
+    {
+      "id": "AN-NSF041",
+      "query": "countertop bracket",
+      "searchCount": 213,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 41
+    },
+    {
+      "id": "AN-NSF042",
+      "query": "gloves",
+      "searchCount": 211,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 42
+    },
+    {
+      "id": "AN-NSF043",
+      "query": "trash pull out",
+      "searchCount": 211,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 43
+    },
+    {
+      "id": "AN-NSF044",
+      "query": "shelf bracket",
+      "searchCount": 210,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 44
+    },
+    {
+      "id": "AN-NSF045",
+      "query": "rags",
+      "searchCount": 208,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 45
+    },
+    {
+      "id": "AN-NSF046",
+      "query": "docking drawer",
+      "searchCount": 201,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 46
+    },
+    {
+      "id": "AN-NSF047",
+      "query": "rakks",
+      "searchCount": 197,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 47
+    },
+    {
+      "id": "AN-NSF048",
+      "query": "chemetal",
+      "searchCount": 193,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 48
+    },
+    {
+      "id": "AN-NSF049",
+      "query": "blum hinge",
+      "searchCount": 189,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 49
+    },
+    {
+      "id": "AN-NSF050",
+      "query": "rev a shelf",
+      "searchCount": 183,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-searches",
+      "rank": 50
+    },
+    {
+      "id": "AN-NSC001",
+      "query": "closet rod",
+      "searchCount": 1590,
+      "clickCount": 886,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 1
+    },
+    {
+      "id": "AN-NSC002",
+      "query": "plywood",
+      "searchCount": 769,
+      "clickCount": 468,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 2
+    },
+    {
+      "id": "AN-NSC003",
+      "query": "mdf",
+      "searchCount": 1000,
+      "clickCount": 410,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 3
+    },
+    {
+      "id": "AN-NSC004",
+      "query": "lemans",
+      "searchCount": 523,
+      "clickCount": 387,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 4
+    },
+    {
+      "id": "AN-NSC005",
+      "query": "blum hinges",
+      "searchCount": 860,
+      "clickCount": 362,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 5
+    },
+    {
+      "id": "AN-NSC006",
+      "query": "hamper",
+      "searchCount": 548,
+      "clickCount": 359,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 6
+    },
+    {
+      "id": "AN-NSC007",
+      "query": "lazy susan",
+      "searchCount": 637,
+      "clickCount": 316,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 7
+    },
+    {
+      "id": "AN-NSC008",
+      "query": "grommet",
+      "searchCount": 613,
+      "clickCount": 285,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 8
+    },
+    {
+      "id": "AN-NSC009",
+      "query": "bar pull",
+      "searchCount": 598,
+      "clickCount": 281,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 9
+    },
+    {
+      "id": "AN-NSC010",
+      "query": "trash pullout",
+      "searchCount": 462,
+      "clickCount": 278,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 10
+    },
+    {
+      "id": "AN-NSC011",
+      "query": "z clip",
+      "searchCount": 415,
+      "clickCount": 272,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 11
+    },
+    {
+      "id": "AN-NSC012",
+      "query": "mixer lift",
+      "searchCount": 351,
+      "clickCount": 258,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 12
+    },
+    {
+      "id": "AN-NSC013",
+      "query": "coat hook",
+      "searchCount": 535,
+      "clickCount": 254,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 13
+    },
+    {
+      "id": "AN-NSC014",
+      "query": "wire pull",
+      "searchCount": 471,
+      "clickCount": 251,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 14
+    },
+    {
+      "id": "AN-NSC015",
+      "query": "Rev-A-Shelf Corporation",
+      "searchCount": 943,
+      "clickCount": 230,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 15
+    },
+    {
+      "id": "AN-NSC016",
+      "query": "shelf pins",
+      "searchCount": 611,
+      "clickCount": 228,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 16
+    },
+    {
+      "id": "AN-NSC017",
+      "query": "trash pull out",
+      "searchCount": 368,
+      "clickCount": 228,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 17
+    },
+    {
+      "id": "AN-NSC018",
+      "query": "blum",
+      "searchCount": 560,
+      "clickCount": 226,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 18
+    },
+    {
+      "id": "AN-NSC019",
+      "query": "piano hinge",
+      "searchCount": 436,
+      "clickCount": 223,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 19
+    },
+    {
+      "id": "AN-NSC020",
+      "query": "movento",
+      "searchCount": 337,
+      "clickCount": 204,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 20
+    },
+    {
+      "id": "AN-NSC021",
+      "query": "Kessebohmer USA Inc",
+      "searchCount": 307,
+      "clickCount": 198,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 21
+    },
+    {
+      "id": "AN-NSC022",
+      "query": "edge pull",
+      "searchCount": 364,
+      "clickCount": 196,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 22
+    },
+    {
+      "id": "AN-NSC023",
+      "query": "pocket door",
+      "searchCount": 442,
+      "clickCount": 195,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 23
+    },
+    {
+      "id": "AN-NSC024",
+      "query": "cam locks",
+      "searchCount": 371,
+      "clickCount": 195,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 24
+    },
+    {
+      "id": "AN-NSC025",
+      "query": "melamine",
+      "searchCount": 551,
+      "clickCount": 187,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 25
+    },
+    {
+      "id": "AN-NSC026",
+      "query": "concealed bracket",
+      "searchCount": 340,
+      "clickCount": 185,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 26
+    },
+    {
+      "id": "AN-NSC027",
+      "query": "gloves",
+      "searchCount": 271,
+      "clickCount": 184,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 27
+    },
+    {
+      "id": "AN-NSC028",
+      "query": "tafisa",
+      "searchCount": 458,
+      "clickCount": 180,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 28
+    },
+    {
+      "id": "AN-NSC029",
+      "query": "bumpers",
+      "searchCount": 299,
+      "clickCount": 180,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 29
+    },
+    {
+      "id": "AN-NSC030",
+      "query": "formica",
+      "searchCount": 696,
+      "clickCount": 179,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 30
+    },
+    {
+      "id": "AN-NSC031",
+      "query": "floating shelf bracket",
+      "searchCount": 338,
+      "clickCount": 173,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 31
+    },
+    {
+      "id": "AN-NSC032",
+      "query": "docking drawer",
+      "searchCount": 308,
+      "clickCount": 169,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 32
+    },
+    {
+      "id": "AN-NSC033",
+      "query": "titebond",
+      "searchCount": 335,
+      "clickCount": 167,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 33
+    },
+    {
+      "id": "AN-NSC034",
+      "query": "karran",
+      "searchCount": 385,
+      "clickCount": 164,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 34
+    },
+    {
+      "id": "AN-NSC035",
+      "query": "lamello",
+      "searchCount": 348,
+      "clickCount": 164,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 35
+    },
+    {
+      "id": "AN-NSC036",
+      "query": "rakks",
+      "searchCount": 305,
+      "clickCount": 163,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 36
+    },
+    {
+      "id": "AN-NSC037",
+      "query": "floating shelf",
+      "searchCount": 271,
+      "clickCount": 162,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 37
+    },
+    {
+      "id": "AN-NSC038",
+      "query": "rags",
+      "searchCount": 255,
+      "clickCount": 159,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 38
+    },
+    {
+      "id": "AN-NSC039",
+      "query": "countertop bracket",
+      "searchCount": 521,
+      "clickCount": 151,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 39
+    },
+    {
+      "id": "AN-NSC040",
+      "query": "rev-a-shelf",
+      "searchCount": 726,
+      "clickCount": 148,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 40
+    },
+    {
+      "id": "AN-NSC041",
+      "query": "countertop support",
+      "searchCount": 279,
+      "clickCount": 147,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 41
+    },
+    {
+      "id": "AN-NSC042",
+      "query": "trash",
+      "searchCount": 316,
+      "clickCount": 145,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 42
+    },
+    {
+      "id": "AN-NSC043",
+      "query": "workstation bracket",
+      "searchCount": 279,
+      "clickCount": 144,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 43
+    },
+    {
+      "id": "AN-NSC044",
+      "query": "blind corner",
+      "searchCount": 250,
+      "clickCount": 140,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 44
+    },
+    {
+      "id": "AN-NSC045",
+      "query": "edgebanding",
+      "searchCount": 373,
+      "clickCount": 138,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 45
+    },
+    {
+      "id": "AN-NSC046",
+      "query": "mixing cups",
+      "searchCount": 253,
+      "clickCount": 137,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 46
+    },
+    {
+      "id": "AN-NSC047",
+      "query": "tip on",
+      "searchCount": 218,
+      "clickCount": 134,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 47
+    },
+    {
+      "id": "AN-NSC048",
+      "query": "tambour",
+      "searchCount": 237,
+      "clickCount": 133,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 48
+    },
+    {
+      "id": "AN-NSC049",
+      "query": "fastcap",
+      "searchCount": 273,
+      "clickCount": 129,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 49
+    },
+    {
+      "id": "AN-NSC050",
+      "query": "trash can",
+      "searchCount": 222,
+      "clickCount": 126,
+      "source": "top50-pdf-2026-08-31",
+      "category": "non-sku",
+      "list": "non-sku-by-clicks",
+      "rank": 50
+    },
+    {
+      "id": "AN-SKF001",
+      "query": "Studio 917",
+      "searchCount": 254,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 1
+    },
+    {
+      "id": "AN-SKF002",
+      "query": "BP563H5330B",
+      "searchCount": 205,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 2
+    },
+    {
+      "id": "AN-SKF003",
+      "query": "studio 917",
+      "searchCount": 201,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 3
+    },
+    {
+      "id": "AN-SKF004",
+      "query": "909",
+      "searchCount": 130,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 4
+    },
+    {
+      "id": "AN-SKF005",
+      "query": "563h",
+      "searchCount": 126,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 5
+    },
+    {
+      "id": "AN-SKF006",
+      "query": "BP71B3580",
+      "searchCount": 118,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 6
+    },
+    {
+      "id": "AN-SKF007",
+      "query": "dhp140bsn-96",
+      "searchCount": 97,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 7
+    },
+    {
+      "id": "AN-SKF008",
+      "query": "909-58",
+      "searchCount": 96,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 8
+    },
+    {
+      "id": "AN-SKF009",
+      "query": "kv82",
+      "searchCount": 94,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 9
+    },
+    {
+      "id": "AN-SKF010",
+      "query": "71b3580",
+      "searchCount": 87,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 10
+    },
+    {
+      "id": "AN-SKF011",
+      "query": "949",
+      "searchCount": 87,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 11
+    },
+    {
+      "id": "AN-SKF012",
+      "query": "kv182",
+      "searchCount": 87,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 12
+    },
+    {
+      "id": "AN-SKF013",
+      "query": "563H5330B",
+      "searchCount": 86,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 13
+    },
+    {
+      "id": "AN-SKF014",
+      "query": "949-58",
+      "searchCount": 85,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 14
+    },
+    {
+      "id": "AN-SKF015",
+      "query": "fenix j0793",
+      "searchCount": 82,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 15
+    },
+    {
+      "id": "AN-SKF016",
+      "query": "dspro100",
+      "searchCount": 80,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 16
+    },
+    {
+      "id": "AN-SKF017",
+      "query": "d-dur 2k poly clear",
+      "searchCount": 77,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 17
+    },
+    {
+      "id": "AN-SKF018",
+      "query": "909 Surfaces",
+      "searchCount": 76,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 18
+    },
+    {
+      "id": "AN-SKF019",
+      "query": "DHP822MB",
+      "searchCount": 76,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 19
+    },
+    {
+      "id": "AN-SKF020",
+      "query": "IF711NP",
+      "searchCount": 73,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 20
+    },
+    {
+      "id": "AN-SKF021",
+      "query": "569F4570B",
+      "searchCount": 71,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 21
+    },
+    {
+      "id": "AN-SKF022",
+      "query": "e350",
+      "searchCount": 71,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 22
+    },
+    {
+      "id": "AN-SKF023",
+      "query": "kv187",
+      "searchCount": 71,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 23
+    },
+    {
+      "id": "AN-SKF024",
+      "query": "KV82",
+      "searchCount": 71,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 24
+    },
+    {
+      "id": "AN-SKF025",
+      "query": "53702",
+      "searchCount": 70,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 25
+    },
+    {
+      "id": "AN-SKF026",
+      "query": "dhp140-bsn-96",
+      "searchCount": 70,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 26
+    },
+    {
+      "id": "AN-SKF027",
+      "query": "formica 200",
+      "searchCount": 70,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 27
+    },
+    {
+      "id": "AN-SKF028",
+      "query": "kv87",
+      "searchCount": 70,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 28
+    },
+    {
+      "id": "AN-SKF029",
+      "query": "c8053",
+      "searchCount": 69,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 29
+    },
+    {
+      "id": "AN-SKF030",
+      "query": "DHP822BSN",
+      "searchCount": 69,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 30
+    },
+    {
+      "id": "AN-SKF031",
+      "query": "BP563H4570B",
+      "searchCount": 68,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 31
+    },
+    {
+      "id": "AN-SKF032",
+      "query": "4WCSC-1835DM-2",
+      "searchCount": 66,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 32
+    },
+    {
+      "id": "AN-SKF033",
+      "query": "BP173H7100",
+      "searchCount": 66,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 33
+    },
+    {
+      "id": "AN-SKF034",
+      "query": "UF53111-46-003",
+      "searchCount": 66,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 34
+    },
+    {
+      "id": "AN-SKF035",
+      "query": "BPT511901L",
+      "searchCount": 65,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 35
+    },
+    {
+      "id": "AN-SKF036",
+      "query": "WW48700",
+      "searchCount": 65,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 36
+    },
+    {
+      "id": "AN-SKF037",
+      "query": "71B3590",
+      "searchCount": 63,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 37
+    },
+    {
+      "id": "AN-SKF038",
+      "query": "kv185",
+      "searchCount": 62,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 38
+    },
+    {
+      "id": "AN-SKF039",
+      "query": "6696-58",
+      "searchCount": 61,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 39
+    },
+    {
+      "id": "AN-SKF040",
+      "query": "DSPRO100SC-20",
+      "searchCount": 61,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 40
+    },
+    {
+      "id": "AN-SKF041",
+      "query": "KV182",
+      "searchCount": 60,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 41
+    },
+    {
+      "id": "AN-SKF042",
+      "query": "SZPF1",
+      "searchCount": 59,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 42
+    },
+    {
+      "id": "AN-SKF043",
+      "query": "4WCTM",
+      "searchCount": 59,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 43
+    },
+    {
+      "id": "AN-SKF044",
+      "query": "BP71B3550",
+      "searchCount": 58,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 44
+    },
+    {
+      "id": "AN-SKF045",
+      "query": "RS4WCSC-1835DM-2",
+      "searchCount": 57,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 45
+    },
+    {
+      "id": "AN-SKF046",
+      "query": "8092",
+      "searchCount": 56,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 46
+    },
+    {
+      "id": "AN-SKF047",
+      "query": "BP174H7100E",
+      "searchCount": 56,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 47
+    },
+    {
+      "id": "AN-SKF048",
+      "query": "dspro3.0",
+      "searchCount": 56,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 48
+    },
+    {
+      "id": "AN-SKF049",
+      "query": "Formica 1994",
+      "searchCount": 56,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 49
+    },
+    {
+      "id": "AN-SKF050",
+      "query": "kv255",
+      "searchCount": 56,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-searches",
+      "rank": 50
+    },
+    {
+      "id": "AN-SKC001",
+      "query": "Studio 917",
+      "searchCount": 517,
+      "clickCount": 183,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 1
+    },
+    {
+      "id": "AN-SKC002",
+      "query": "BP563H5330B",
+      "searchCount": 253,
+      "clickCount": 155,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 2
+    },
+    {
+      "id": "AN-SKC003",
+      "query": "BP71B3580",
+      "searchCount": 191,
+      "clickCount": 133,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 3
+    },
+    {
+      "id": "AN-SKC004",
+      "query": "563h",
+      "searchCount": 168,
+      "clickCount": 112,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 4
+    },
+    {
+      "id": "AN-SKC005",
+      "query": "kv82",
+      "searchCount": 169,
+      "clickCount": 95,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 5
+    },
+    {
+      "id": "AN-SKC006",
+      "query": "563H5330B",
+      "searchCount": 140,
+      "clickCount": 84,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 6
+    },
+    {
+      "id": "AN-SKC007",
+      "query": "909",
+      "searchCount": 134,
+      "clickCount": 84,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 7
+    },
+    {
+      "id": "AN-SKC008",
+      "query": "kv182",
+      "searchCount": 153,
+      "clickCount": 75,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 8
+    },
+    {
+      "id": "AN-SKC009",
+      "query": "71b3580",
+      "searchCount": 139,
+      "clickCount": 74,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 9
+    },
+    {
+      "id": "AN-SKC010",
+      "query": "kv87",
+      "searchCount": 122,
+      "clickCount": 72,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 10
+    },
+    {
+      "id": "AN-SKC011",
+      "query": "949",
+      "searchCount": 91,
+      "clickCount": 68,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 11
+    },
+    {
+      "id": "AN-SKC012",
+      "query": "71B3590",
+      "searchCount": 93,
+      "clickCount": 66,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 12
+    },
+    {
+      "id": "AN-SKC013",
+      "query": "909-58",
+      "searchCount": 99,
+      "clickCount": 61,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 13
+    },
+    {
+      "id": "AN-SKC014",
+      "query": "formica 200",
+      "searchCount": 115,
+      "clickCount": 60,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 14
+    },
+    {
+      "id": "AN-SKC015",
+      "query": "4WCSC-1835DM-2",
+      "searchCount": 112,
+      "clickCount": 60,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 15
+    },
+    {
+      "id": "AN-SKC016",
+      "query": "kv85",
+      "searchCount": 111,
+      "clickCount": 58,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 16
+    },
+    {
+      "id": "AN-SKC017",
+      "query": "5 knuckle hinge",
+      "searchCount": 96,
+      "clickCount": 57,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 17
+    },
+    {
+      "id": "AN-SKC018",
+      "query": "448UT-BCSC-8C",
+      "searchCount": 87,
+      "clickCount": 56,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 18
+    },
+    {
+      "id": "AN-SKC019",
+      "query": "c8053",
+      "searchCount": 93,
+      "clickCount": 53,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 19
+    },
+    {
+      "id": "AN-SKC020",
+      "query": "BP71B3550",
+      "searchCount": 85,
+      "clickCount": 53,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 20
+    },
+    {
+      "id": "AN-SKC021",
+      "query": "174H7100E",
+      "searchCount": 81,
+      "clickCount": 53,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 21
+    },
+    {
+      "id": "AN-SKC022",
+      "query": "kv187",
+      "searchCount": 105,
+      "clickCount": 52,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 22
+    },
+    {
+      "id": "AN-SKC023",
+      "query": "IF711NP",
+      "searchCount": 95,
+      "clickCount": 52,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 23
+    },
+    {
+      "id": "AN-SKC024",
+      "query": "DSPRO100SC-20",
+      "searchCount": 107,
+      "clickCount": 51,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 24
+    },
+    {
+      "id": "AN-SKC025",
+      "query": "dspro3.0",
+      "searchCount": 87,
+      "clickCount": 51,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 25
+    },
+    {
+      "id": "AN-SKC026",
+      "query": "kv185",
+      "searchCount": 94,
+      "clickCount": 50,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 26
+    },
+    {
+      "id": "AN-SKC027",
+      "query": "BPT511901L",
+      "searchCount": 85,
+      "clickCount": 50,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 27
+    },
+    {
+      "id": "AN-SKC028",
+      "query": "949-58",
+      "searchCount": 87,
+      "clickCount": 49,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 28
+    },
+    {
+      "id": "AN-SKC029",
+      "query": "kv 8091",
+      "searchCount": 68,
+      "clickCount": 49,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 29
+    },
+    {
+      "id": "AN-SKC030",
+      "query": "dspro100",
+      "searchCount": 97,
+      "clickCount": 48,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 30
+    },
+    {
+      "id": "AN-SKC031",
+      "query": "BP71B3590",
+      "searchCount": 87,
+      "clickCount": 48,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 31
+    },
+    {
+      "id": "AN-SKC032",
+      "query": "BP563H4570B",
+      "searchCount": 86,
+      "clickCount": 48,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 32
+    },
+    {
+      "id": "AN-SKC033",
+      "query": "1/4 mdf",
+      "searchCount": 78,
+      "clickCount": 48,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 33
+    },
+    {
+      "id": "AN-SKC034",
+      "query": "BP174H7100E",
+      "searchCount": 79,
+      "clickCount": 47,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 34
+    },
+    {
+      "id": "AN-SKC035",
+      "query": "4SDI-36-1",
+      "searchCount": 83,
+      "clickCount": 46,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 35
+    },
+    {
+      "id": "AN-SKC036",
+      "query": "dspro100sc",
+      "searchCount": 72,
+      "clickCount": 46,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 36
+    },
+    {
+      "id": "AN-SKC037",
+      "query": "18 Inch depth soft close drawer glides",
+      "searchCount": 47,
+      "clickCount": 46,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 37
+    },
+    {
+      "id": "AN-SKC038",
+      "query": "4WCT-3",
+      "searchCount": 82,
+      "clickCount": 45,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 38
+    },
+    {
+      "id": "AN-SKC039",
+      "query": "448-bcsc-8c",
+      "searchCount": 68,
+      "clickCount": 45,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 39
+    },
+    {
+      "id": "AN-SKC040",
+      "query": "kv8091",
+      "searchCount": 61,
+      "clickCount": 45,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 40
+    },
+    {
+      "id": "AN-SKC041",
+      "query": "173H7100",
+      "searchCount": 61,
+      "clickCount": 44,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 41
+    },
+    {
+      "id": "AN-SKC042",
+      "query": "909 Surfaces",
+      "searchCount": 102,
+      "clickCount": 43,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 42
+    },
+    {
+      "id": "AN-SKC043",
+      "query": "e350",
+      "searchCount": 89,
+      "clickCount": 43,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 43
+    },
+    {
+      "id": "AN-SKC044",
+      "query": "kv8400",
+      "searchCount": 84,
+      "clickCount": 43,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 44
+    },
+    {
+      "id": "AN-SKC045",
+      "query": "kv255",
+      "searchCount": 92,
+      "clickCount": 42,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 45
+    },
+    {
+      "id": "AN-SKC046",
+      "query": "5mm shelf pins",
+      "searchCount": 70,
+      "clickCount": 41,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 46
+    },
+    {
+      "id": "AN-SKC047",
+      "query": "448-bcsc-5c",
+      "searchCount": 67,
+      "clickCount": 41,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 47
+    },
+    {
+      "id": "AN-SKC048",
+      "query": "dspro600",
+      "searchCount": 66,
+      "clickCount": 41,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 48
+    },
+    {
+      "id": "AN-SKC049",
+      "query": "71T5580",
+      "searchCount": 59,
+      "clickCount": 41,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 49
+    },
+    {
+      "id": "AN-SKC050",
+      "query": "71B3550",
+      "searchCount": 56,
+      "clickCount": 41,
+      "source": "top50-pdf-2026-08-31",
+      "category": "sku",
+      "list": "sku-by-clicks",
+      "rank": 50
+    }
+  ]
+}
