@@ -298,7 +298,7 @@ Official execution is via the existing workflows under `.github/workflows/` (cyc
 | Secret | Purpose |
 | --- | --- |
 | `VERCEL_AUTOMATION_BYPASS_SECRET` | Vercel Deployment Protection bypass |
-| `TEAMS_SEARCH_UI_WEBHOOK` | Microsoft Teams Incoming Webhook for smoke notifications |
+| `TEAMS_SEARCH_UI_WEBHOOK` | Microsoft Teams **Workflow** webhook URL (Adaptive Card) for smoke notifications |
 
 **Optional repository variables:**
 
@@ -314,7 +314,7 @@ Official execution is via the existing workflows under `.github/workflows/` (cyc
 - `reports/html/search-ui-smoke-dashboard.html` (detailed cycle / module / test dashboard)
 - `test-results/` on failure
 
-Teams messages include links to the Actions run and the artifact section (download `search-ui-smoke-dashboard.html`). Local dry-run:
+Teams messages use a **Workflow Adaptive Card** with clickable actions for the Actions run and the artifact section (download `search-ui-smoke-dashboard.html`). Local dry-run:
 
 ```bash
 npm run notify:smoke:teams:dry-run
