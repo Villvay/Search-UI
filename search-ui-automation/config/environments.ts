@@ -31,13 +31,13 @@ const ENVIRONMENT_DEFAULTS: Record<EnvironmentName, EnvironmentConfig> = {
    */
   staging: {
     name: 'staging',
-    baseURL: 'https://wurthbaersupply.com',
+    baseURL: 'https://shop.wurthbaerusa.com',
     homePath: '/',
     searchPath: '/search',
   },
   production: {
     name: 'production',
-    baseURL: 'https://shop.wurthbaerusa.com',
+    baseURL: 'https://wurthbaersupply.com',
     homePath: '/',
     searchPath: '/search',
   },
@@ -62,6 +62,18 @@ export function getEnvironmentConfig(): EnvironmentConfig {
     ...defaults,
     baseURL,
   };
+}
+
+/** Label reports from the live host, not only ENV (BASE_URL can point at production). */
+export function getEnvironmentLabel(config = getEnvironmentConfig()): EnvironmentName {
+  try {
+    const host = new URL(config.baseURL).hostname.replace(/^www\./, '').toLowerCase();
+    if (host === 'wurthbaersupply.com') return 'production';
+    if (host === 'qa-baersupply.vercel.app') return 'qa';
+  } catch {
+    // keep ENV name
+  }
+  return config.name;
 }
 
 export function getVercelBypassSecret(): string | undefined {

@@ -54,6 +54,9 @@ SKU_DATASET=/path/to/catalog_sku_plp_results.json SKU_LIMIT=50 npm run test:sku-
 
 # Run the JSON list in file order (no A→B→C sequence expansion)
 SKU_CACHE_SEQUENCES=0 npm run test:sku-plp
+
+# One fresh browser context per SKU (no leftover session cache)
+SKU_CLEAN_BROWSER=1 SKU_CACHE_SEQUENCES=0 npm run test:sku-plp
 ```
 
 Reports:

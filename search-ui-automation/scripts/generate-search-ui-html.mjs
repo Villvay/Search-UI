@@ -1,18 +1,36 @@
 /**
  * Builds an interactive Search UI dashboard from reports/search-ui-summary.json.
- * Output: reports/html/index.html
+ * Output: reports/html/index.html (override with --summary / --out for cycles)
+ *
+ *   node scripts/generate-search-ui-html.mjs
+ *   node scripts/generate-search-ui-html.mjs --summary=reports/search-ui-smoke-report.json --out=reports/html/search-ui-smoke-dashboard.html
  */
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const summaryPath = path.join(root, 'reports', 'search-ui-summary.json');
-const outDir = path.join(root, 'reports', 'html');
-const outFile = path.join(outDir, 'index.html');
+
+function parseHtmlArgs(argv) {
+  let summaryRel = 'reports/search-ui-summary.json';
+  let outRel = 'reports/html/index.html';
+  for (const arg of argv) {
+    if (arg.startsWith('--summary=')) summaryRel = arg.slice('--summary='.length);
+    else if (arg.startsWith('--out=')) outRel = arg.slice('--out='.length);
+  }
+  return {
+    summaryPath: path.resolve(root, summaryRel),
+    outFile: path.resolve(root, outRel),
+  };
+}
+
+const { summaryPath, outFile } = parseHtmlArgs(process.argv.slice(2));
+const outDir = path.dirname(outFile);
 
 if (!fs.existsSync(summaryPath)) {
-  console.error('Missing reports/search-ui-summary.json — run test:summary first.');
+  console.error(
+    `Missing ${path.relative(root, summaryPath)} — run test:summary or a test cycle first.`,
+  );
   process.exit(1);
 }
 
@@ -22,8 +40,7 @@ const dataJson = JSON.stringify(summary).replace(/</g, '\\u003c');
 const clientJs = `
 const DATA = ${dataJson};
 
-const MODULE_ORDER = ['FRAMEWORK', 'ON-TYPE', 'SUGGESTIONS', 'ON-ENTER', 'RELATED SEARCHES', 'FILTERS & FACETS', 'SORTING', 'ON-TYPE ANALYTICS', 'SUGGESTIONS ANALYTICS', 'ON-ENTER ANALYTICS'];
-const VIEWPORT_ORDER = ['desktop-1440', 'desktop-1440-chrome', 'desktop-1440-firefox', 'desktop-1440-safari', 'desktop-1280', 'tablet-1024', 'tablet-768', 'mobile-390', 'mobile-375'];
+const MODULE_ORDER = ['FRAMEWORK', 'ON-TYPE', 'SUGGESTIONS', 'TRENDING NOW', 'RECENT SEARCHES', 'RUNTIME ERRORS', 'CACHE & STATE', 'SEARCH INPUT ROBUSTNESS', 'ON-ENTER', 'RELATED SEARCHES', 'FILTERS & FACETS', 'SORTING', 'ON-TYPE ANALYTICS', 'SUGGESTIONS ANALYTICS', 'ON-ENTER ANALYTICS'];const VIEWPORT_ORDER = ['desktop-1440', 'desktop-1440-chrome', 'desktop-1440-firefox', 'desktop-1440-safari', 'desktop-1280', 'tablet-1024', 'tablet-768', 'mobile-390', 'mobile-375'];
 
 function esc(s) {
   return String(s ?? '')
@@ -38,10 +55,18 @@ function statusLabel(status) {
   if (status === 'passed') return 'PASS';
   if (status === 'failed') return 'FAIL';
   if (status === 'skipped') return 'SKIPPED';
+  if (status === 'KNOWN DEFECT' || status === 'known-defect') return 'KNOWN DEFECT';
   return String(status || '').toUpperCase();
 }
 
+function displayStatus(t) {
+  return t.cycleStatus || statusLabel(t.status);
+}
+
 function noteFor(t) {
+  if (t.cycleStatus === 'KNOWN DEFECT') {
+    return t.knownDefectReason || t.error || 'Documented known defect';
+  }
   if (t.status === 'failed') return t.error || '';
   if (t.status === 'skipped') return t.skipReason || 'Skipped';
   if (t.status === 'recovered') return 'Passed on retry' + (t.error ? '; earlier: ' + t.error : '');
@@ -79,34 +104,88 @@ function renderBars(targetId, order, bucket) {
 
 function init() {
   const o = DATA.overall || {};
-  const failed = o.failed || 0;
+  const cycle = DATA.cycle || null;
+  const unexpectedFailed = cycle ? (cycle.counts?.failed || 0) : (o.failed || 0);
+  const knownDefects = cycle ? (cycle.counts?.knownDefects || 0) : 0;
   const verdict = document.getElementById('verdict');
   const verdictValue = document.getElementById('verdictValue');
   const verdictDetail = document.getElementById('verdictDetail');
 
-  if (failed > 0) {
+  if (unexpectedFailed > 0) {
     verdict.className = 'verdict bad';
-    verdictValue.textContent = failed + ' failed';
+    verdictValue.textContent = unexpectedFailed + ' failed';
     verdictDetail.textContent =
+      (cycle ? 'Cycle ' + cycle.result + ' · ' : '') +
       'Pass rate ' + (o.passRate || '—') +
-      ' · ' + (o.passed || 0) + ' passed · ' + (o.skipped || 0) + ' skipped';
+      ' · ' + (cycle?.counts?.passed ?? o.passed ?? 0) + ' passed · ' +
+      (cycle?.counts?.skipped ?? o.skipped ?? 0) + ' skipped' +
+      (knownDefects ? ' · ' + knownDefects + ' known defect(s)' : '');
+  } else if (knownDefects > 0) {
+    verdict.className = 'verdict warn';
+    verdictValue.textContent = 'Pass with known defects';
+    verdictDetail.textContent =
+      (cycle ? 'Cycle ' + cycle.result + ' · ' : '') +
+      knownDefects + ' known defect(s) · ' +
+      (cycle?.counts?.skipped ?? o.skipped ?? 0) + ' skipped';
   } else {
     verdict.className = 'verdict ok';
-    verdictValue.textContent = 'All executed tests passed';
+    verdictValue.textContent = cycle ? (cycle.result || 'PASS') : 'All executed tests passed';
     verdictDetail.textContent =
       'Pass rate ' + (o.passRate || '—') +
-      ' · ' + (o.skipped || 0) + ' skipped (expected for unavailable features)';
+      ' · ' + (cycle?.counts?.skipped ?? o.skipped ?? 0) + ' skipped (expected for unavailable features)';
+  }
+
+  const cycleEl = document.getElementById('cycleMeta');
+  if (cycleEl) {
+    if (cycle) {
+      cycleEl.hidden = false;
+      cycleEl.innerHTML =
+        '<strong>Test Cycle:</strong> ' + esc((cycle.id || '').toUpperCase()) +
+        ' · <strong>Env:</strong> ' + esc(cycle.environment || '—') +
+        ' · <strong>Browser:</strong> ' + esc(cycle.browser || 'Chromium') +
+        ' · <strong>Viewport(s):</strong> ' + esc((cycle.projects || []).join(', ') || '—') +
+        ' · <strong>Start:</strong> ' + esc(cycle.startedAt || '—') +
+        ' · <strong>Duration:</strong> ' + esc(fmtDuration(cycle.wallClockMs));
+    } else {
+      cycleEl.hidden = true;
+    }
+  }
+
+  const cyclePanel = document.getElementById('cyclePanel');
+  if (cyclePanel) {
+    if (cycle) {
+      cyclePanel.hidden = false;
+      cyclePanel.innerHTML =
+        '<h2>SEARCH UI TEST CYCLE</h2>' +
+        '<div class="cycle-grid">' +
+          '<div><span class="k">Cycle</span><span class="v">' + esc((cycle.id || '').toUpperCase()) + '</span></div>' +
+          '<div><span class="k">Environment</span><span class="v">' + esc(cycle.environment || '—') + '</span></div>' +
+          '<div><span class="k">Browser</span><span class="v">' + esc(cycle.browser || 'Chromium') + '</span></div>' +
+          '<div><span class="k">Viewports</span><span class="v">' + esc((cycle.projects || []).join(', ') || '—') + '</span></div>' +
+          '<div><span class="k">Start time</span><span class="v">' + esc(cycle.startedAt || '—') + '</span></div>' +
+          '<div><span class="k">Duration</span><span class="v">' + esc(fmtDuration(cycle.wallClockMs)) + '</span></div>' +
+          '<div><span class="k">Total</span><span class="v">' + (cycle.counts?.total ?? 0) + '</span></div>' +
+          '<div><span class="k">Passed</span><span class="v">' + (cycle.counts?.passed ?? 0) + '</span></div>' +
+          '<div><span class="k">Failed</span><span class="v">' + (cycle.counts?.failed ?? 0) + '</span></div>' +
+          '<div><span class="k">Skipped</span><span class="v">' + (cycle.counts?.skipped ?? 0) + '</span></div>' +
+          '<div><span class="k">Known defects</span><span class="v">' + knownDefects + '</span></div>' +
+          '<div><span class="k">Unexpected failures</span><span class="v">' + unexpectedFailed + '</span></div>' +
+          '<div><span class="k">Final result</span><span class="v">' + esc(cycle.result === 'FAILED' ? 'FAIL' : 'PASS') + '</span></div>' +
+        '</div>';
+    } else {
+      cyclePanel.hidden = true;
+    }
   }
 
   document.getElementById('generatedMeta').textContent =
     'Generated ' + (DATA.generatedAt || '—') + ' · Source ' + (DATA.source || '—');
 
   document.getElementById('metrics').innerHTML =
-    '<div class="metric"><div class="k">Total</div><div class="v">' + (o.total || 0) + '</div></div>' +
-    '<div class="metric pass"><div class="k">Passed</div><div class="v">' + (o.passed || 0) + '</div></div>' +
-    '<div class="metric fail"><div class="k">Failed</div><div class="v">' + (o.failed || 0) + '</div></div>' +
-    '<div class="metric skip"><div class="k">Skipped</div><div class="v">' + (o.skipped || 0) + '</div></div>' +
-    '<div class="metric recover"><div class="k">Recovered</div><div class="v">' + (o.recovered || 0) + '</div></div>' +
+    '<div class="metric"><div class="k">Total</div><div class="v">' + (cycle?.counts?.total ?? o.total ?? 0) + '</div></div>' +
+    '<div class="metric pass"><div class="k">Passed</div><div class="v">' + (cycle?.counts?.passed ?? o.passed ?? 0) + '</div></div>' +
+    '<div class="metric fail"><div class="k">Failed</div><div class="v">' + (cycle?.counts?.failed ?? o.failed ?? 0) + '</div></div>' +
+    '<div class="metric skip"><div class="k">Skipped</div><div class="v">' + (cycle?.counts?.skipped ?? o.skipped ?? 0) + '</div></div>' +
+    '<div class="metric known"><div class="k">Known defects</div><div class="v">' + knownDefects + '</div></div>' +
     '<div class="metric"><div class="k">Pass rate</div><div class="v">' + esc(o.passRate || '—') + '</div></div>';
 
   renderBars('moduleBars', MODULE_ORDER, DATA.byModule || {});
@@ -156,9 +235,16 @@ function renderTable() {
   const rows = (DATA.tests || []).filter((t) => {
     if (module && t.module !== module) return false;
     if (viewport && t.viewport !== viewport) return false;
-    if (status && t.status !== status) return false;
+    if (status) {
+      const ds = displayStatus(t);
+      if (status === 'known-defect') {
+        if (ds !== 'KNOWN DEFECT') return false;
+      } else if (t.status !== status && ds !== statusLabel(status) && ds !== status) {
+        return false;
+      }
+    }
     if (!q) return true;
-    const hay = [t.testId, t.title, t.module, t.viewport, t.error, t.skipReason]
+    const hay = [t.testId, t.title, t.module, t.viewport, t.error, t.skipReason, t.cycleStatus]
       .join(' ')
       .toLowerCase();
     return hay.includes(q);
@@ -180,9 +266,11 @@ function renderTable() {
       '<tr>' +
         '<td class="mono">' + esc(t.testId || '—') + '</td>' +
         '<td>' + esc(t.module) + '</td>' +
-        '<td>' + esc(t.title) + '</td>' +
+        '<td>' + esc(t.scenario || t.title || '—') + '</td>' +
         '<td class="mono">' + esc(t.viewport) + '</td>' +
-        '<td><span class="badge ' + esc(t.status) + '">' + statusLabel(t.status) + '</span></td>' +
+        '<td><span class="badge ' + esc(t.cycleStatus === 'KNOWN DEFECT' ? 'known' : t.status) + '">' + esc(displayStatus(t)) + '</span>' +
+          (t.knownDefect ? ' <span class="badge known">KNOWN DEFECT</span>' : '') +
+        '</td>' +
         '<td class="mono">' + fmtDuration(t.durationMs) + '</td>' +
         '<td class="notes">' + esc(noteFor(t)) + '</td>' +
       '</tr>'
@@ -259,10 +347,12 @@ const html = `<!DOCTYPE html>
     }
     .verdict.ok { background: var(--pass-bg); border-color: #b7e4c7; }
     .verdict.bad { background: var(--fail-bg); border-color: #f3b4ae; }
+    .verdict.warn { background: var(--skip-bg); border-color: #f0d48a; }
     .verdict .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; color: var(--muted); }
     .verdict .value { font-size: 30px; font-weight: 700; margin-top: 4px; }
     .verdict.ok .value { color: var(--pass); }
     .verdict.bad .value { color: var(--fail); }
+    .verdict.warn .value { color: var(--skip); }
     .verdict .detail { margin-top: 6px; font-size: 13px; color: var(--muted); }
 
     .metrics {
@@ -290,6 +380,32 @@ const html = `<!DOCTYPE html>
     .metric.fail .v { color: var(--fail); }
     .metric.skip .v { color: var(--skip); }
     .metric.recover .v { color: var(--recover); }
+    .metric.known .v { color: var(--skip); }
+
+    .cycle-panel { margin: 20px 0; }
+    .cycle-panel h2 { margin: 0 0 12px; font-size: 16px; letter-spacing: 0.04em; }
+    .cycle-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px 16px;
+    }
+    @media (max-width: 900px) {
+      .cycle-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    .cycle-grid .k {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .cycle-grid .v {
+      display: block;
+      margin-top: 2px;
+      font-weight: 600;
+      word-break: break-word;
+    }
 
     .grid-2 {
       display: grid;
@@ -434,6 +550,7 @@ const html = `<!DOCTYPE html>
     .badge.fail { background: var(--fail-bg); color: var(--fail); }
     .badge.skip { background: var(--skip-bg); color: var(--skip); }
     .badge.recovered { background: var(--recover-bg); color: var(--recover); }
+    .badge.known { background: #eef2ff; color: #3730a3; }
     .mono { font-variant-numeric: tabular-nums; }
     .notes { color: var(--muted); max-width: 360px; }
     .empty {
@@ -454,6 +571,7 @@ const html = `<!DOCTYPE html>
       <div>
         <p class="eyebrow">Search UI Automation</p>
         <h1>Test Results Dashboard</h1>
+        <p class="subtitle" id="cycleMeta" hidden></p>
         <p class="subtitle" id="generatedMeta"></p>
       </div>
       <div id="verdict" class="verdict ok">
@@ -462,6 +580,8 @@ const html = `<!DOCTYPE html>
         <div class="detail" id="verdictDetail"></div>
       </div>
     </header>
+
+    <section class="panel cycle-panel" id="cyclePanel" hidden></section>
 
     <section class="metrics" id="metrics"></section>
 
@@ -509,6 +629,7 @@ const html = `<!DOCTYPE html>
           <option value="failed">Failed</option>
           <option value="skipped">Skipped</option>
           <option value="recovered">Recovered</option>
+          <option value="known-defect">Known defect</option>
         </select>
       </div>
       <div>
@@ -528,11 +649,11 @@ const html = `<!DOCTYPE html>
             <tr>
               <th>Test ID</th>
               <th>Module</th>
-              <th>Test</th>
+              <th>Scenario</th>
               <th>Viewport</th>
               <th>Status</th>
               <th>Duration</th>
-              <th>Notes</th>
+              <th>Notes / Failure reason</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>

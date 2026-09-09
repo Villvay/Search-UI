@@ -1,3 +1,4 @@
+import { getEnvironmentConfig, getEnvironmentLabel } from '../../../../config/environments';
 import { test, expect } from '../../../core/fixtures';
 import { loadSkuDataset } from '../data/skuLoader';
 import { runSkuPlpCacheBatch } from '../skuPlpRunner';
@@ -35,17 +36,33 @@ test.describe('SKU search PLP cache @sku-plp', () => {
       },
     );
 
+    const env = getEnvironmentConfig();
+    const envLabel = getEnvironmentLabel(env);
     const browserName = String(testInfo.project.use.browserName || 'chromium');
+    const datasetFlag = process.env.SKU_DATASET?.trim();
     const report = await runSkuPlpCacheBatch({
       page,
       dataset,
-      environment: (process.env.ENV || 'qa').trim() || 'qa',
+      environment: envLabel,
       browser: browserName.charAt(0).toUpperCase() + browserName.slice(1),
       viewport: testInfo.project.name,
-      command:
-        process.env.SKU_DATASET?.trim()
-          ? `ENV=qa SKU_DATASET=${process.env.SKU_DATASET} npm run test:sku-plp`
-          : 'ENV=qa npm run test:sku-plp',
+      command: [
+        `ENV=${envLabel}`,
+        `BASE_URL=${env.baseURL}`,
+        datasetFlag ? `SKU_DATASET=${datasetFlag}` : '',
+        process.env.SKU_CACHE_SEQUENCES?.trim()
+          ? `SKU_CACHE_SEQUENCES=${process.env.SKU_CACHE_SEQUENCES.trim()}`
+          : '',
+        process.env.SKU_CLEAN_BROWSER?.trim()
+          ? `SKU_CLEAN_BROWSER=${process.env.SKU_CLEAN_BROWSER.trim()}`
+          : '',
+        process.env.SKU_SCREENSHOTS?.trim()
+          ? `SKU_SCREENSHOTS=${process.env.SKU_SCREENSHOTS.trim()}`
+          : '',
+        'npm run test:sku-plp',
+      ]
+        .filter(Boolean)
+        .join(' '),
     });
     const { summary } = report;
 

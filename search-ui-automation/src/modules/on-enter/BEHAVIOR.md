@@ -41,7 +41,8 @@ Enter still executes normal search when the suggestions dropdown is open (ENTER-
 |---|---|
 | Empty (`""`) | **No navigation** — remains on current page |
 | Whitespace (`"   "`) | Navigates to `/search?q=+++` (param value is three spaces) and shows **No Results** empty state |
-| `zzzznonexistentproduct12345` | `/search?q=…` with **No Results** heading + “We couldn't find any results matching your search…” |
+| `qwertyuiopasdfghjklzxcvbnm-nomatch-probe` | `/search?q=…` with **No Results** heading + “We couldn't find any results matching your search…” (QA multisearch `total=0`, inspected 2026-09-09) |
+| ~~`zzzznonexistentproduct12345`~~ | **Obsolete fixture** — Search API now returns fuzzy/retriever hits (~100 products) and SERP shows `Search Results for "…"`. Do not use for ENTER-009. |
 
 The no-results message can appear in more than one region (e.g. Products panel and `main`). Assertions should scope to `main`.
 

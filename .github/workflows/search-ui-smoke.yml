@@ -1,0 +1,177 @@
+name: Search UI Daily Smoke
+
+# Official daily health check of critical Search UI functionality (QA).
+# Schedule: 00:30 UTC ≈ 06:00 Sri Lanka time (UTC+5:30).
+# Full regression is NOT scheduled — use search-ui-regression.yml manually.
+# Uses existing cycle runner: npm run test:smoke
+
+on:
+  schedule:
+    - cron: '30 0 * * *'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment (qa | staging | production)'
+        required: true
+        default: 'qa'
+        type: choice
+        options:
+          - qa
+          - staging
+          - production
+      run_responsive:
+        description: 'Also run smoke across all six responsive viewports (optional; not daily default)'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: search-ui-smoke
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Daily Smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: search-ui-automation
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: search-ui-automation/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Search UI smoke cycle
+        id: smoke_run
+        env:
+          ENV: ${{ github.event.inputs.environment || 'qa' }}
+          BASE_URL: ${{ vars.BASE_URL }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          # Existing cycle defaults: module workers 3, playwright workers 2, retries 1
+          UI_MODULE_WORKERS: '3'
+          UI_PLAYWRIGHT_WORKERS: '2'
+          PLAYWRIGHT_RETRIES: '1'
+          PLAYWRIGHT_HTML_OPEN: never
+          CI: 'true'
+        run: |
+          if [ "${{ github.event.inputs.run_responsive }}" = "true" ]; then
+            npm run test:smoke:responsive
+          else
+            npm run test:smoke
+          fi
+
+      - name: Write GitHub Step Summary
+        if: ${{ !cancelled() }}
+        working-directory: search-ui-automation
+        env:
+          REPORT_PATH: reports/search-ui-smoke-report.json
+          FALLBACK_ENV: ${{ github.event.inputs.environment || 'qa' }}
+          RUN_RESPONSIVE: ${{ github.event.inputs.run_responsive == 'true' && 'true' || 'false' }}
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+          const path = process.env.REPORT_PATH;
+          const out = process.env.GITHUB_STEP_SUMMARY;
+          const lines = [];
+          lines.push('## Search UI Smoke Cycle');
+          if (!fs.existsSync(path)) {
+            lines.push('');
+            lines.push('Report artifact missing — cycle may have failed before report generation.');
+            lines.push('');
+            lines.push(`| Field | Value |`);
+            lines.push(`| --- | --- |`);
+            lines.push(`| Cycle | Smoke |`);
+            lines.push(`| Environment | ${String(process.env.FALLBACK_ENV || 'qa').toUpperCase()} |`);
+            lines.push(`| Responsive | ${process.env.RUN_RESPONSIVE === 'true' ? 'requested' : 'not run'} |`);
+            lines.push(`| Final result | FAIL |`);
+            fs.appendFileSync(out, lines.join('\n') + '\n');
+            process.exit(0);
+          }
+          const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const c = report.cycle || {};
+          const counts = c.counts || {};
+          const durationSec = typeof c.wallClockMs === 'number'
+            ? Math.round(c.wallClockMs / 1000)
+            : null;
+          const duration =
+            durationSec == null
+              ? 'n/a'
+              : durationSec >= 60
+                ? `${Math.floor(durationSec / 60)}m ${durationSec % 60}s`
+                : `${durationSec}s`;
+          const final =
+            c.result === 'PASS' || c.result === 'PASS (KNOWN DEFECTS)'
+              ? 'PASS'
+              : 'FAIL';
+          const responsive = c.responsive
+            ? final === 'PASS'
+              ? 'passed'
+              : 'failed'
+            : 'not run';
+          lines.push('');
+          lines.push('| Field | Value |');
+          lines.push('| --- | --- |');
+          lines.push(`| Cycle | Smoke |`);
+          lines.push(`| Environment | ${c.environment || String(process.env.FALLBACK_ENV || 'qa').toUpperCase()} |`);
+          lines.push(`| Browser | ${c.browser || 'Chromium'} |`);
+          lines.push(`| Projects | ${(c.projects || []).join(', ') || 'desktop-1440'} |`);
+          lines.push(`| Started | ${c.startedAt || 'n/a'} |`);
+          lines.push(`| Duration | ${duration} |`);
+          lines.push(`| Total | ${counts.total ?? 'n/a'} |`);
+          lines.push(`| Passed | ${counts.passed ?? 'n/a'} |`);
+          lines.push(`| Failed | ${counts.failed ?? 'n/a'} |`);
+          lines.push(`| Skipped | ${counts.skipped ?? 'n/a'} |`);
+          lines.push(`| Known defects | ${counts.knownDefects ?? 'n/a'} |`);
+          lines.push(`| Unexpected failures | ${counts.unexpectedFailures ?? 'n/a'} |`);
+          lines.push(`| Responsive | ${responsive} |`);
+          lines.push(`| Final result | **${final}** |`);
+          if (c.result === 'PASS (KNOWN DEFECTS)') {
+            lines.push('');
+            lines.push('_Cycle passed with known defects (does not fail the gate alone)._');
+          }
+          fs.appendFileSync(out, lines.join('\n') + '\n');
+          EOF
+
+      - name: Upload smoke reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: search-ui-smoke-reports${{ github.event.inputs.run_responsive == 'true' && '-responsive' || '' }}
+          retention-days: 14
+          path: |
+            search-ui-automation/reports/search-ui-smoke-report.json
+            search-ui-automation/reports/search-ui-smoke-summary.txt
+            search-ui-automation/reports/html/search-ui-smoke-dashboard.html
+            search-ui-automation/reports/search-ui-summary.json
+            search-ui-automation/reports/search-ui-summary.md
+            search-ui-automation/reports/search-ui-playwright-results.json
+          if-no-files-found: warn
+
+      - name: Upload Playwright failure artifacts
+        if: ${{ !cancelled() && failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: search-ui-smoke-test-results${{ github.event.inputs.run_responsive == 'true' && '-responsive' || '' }}
+          retention-days: 14
+          path: search-ui-automation/test-results/
+          if-no-files-found: ignore

@@ -20,6 +20,11 @@ const MODULE_ORDER = [
   'FRAMEWORK',
   'ON-TYPE',
   'SUGGESTIONS',
+  'TRENDING NOW',
+  'RECENT SEARCHES',
+  'RUNTIME ERRORS',
+  'CACHE & STATE',
+  'SEARCH INPUT ROBUSTNESS',
   'ON-ENTER',
   'RELATED SEARCHES',
   'FILTERS & FACETS',
@@ -33,6 +38,11 @@ const FUNCTIONAL_MODULES = [
   'FRAMEWORK',
   'ON-TYPE',
   'SUGGESTIONS',
+  'TRENDING NOW',
+  'RECENT SEARCHES',
+  'RUNTIME ERRORS',
+  'CACHE & STATE',
+  'SEARCH INPUT ROBUSTNESS',
   'ON-ENTER',
   'RELATED SEARCHES',
   'FILTERS & FACETS',
@@ -67,6 +77,12 @@ function moduleFromFile(file = '') {
     return 'ON-ENTER ANALYTICS';
   if (normalized.includes('/modules/on-type/')) return 'ON-TYPE';
   if (normalized.includes('/modules/suggestions/')) return 'SUGGESTIONS';
+  if (normalized.includes('/modules/trending-now/')) return 'TRENDING NOW';
+  if (normalized.includes('/modules/recent-searches/')) return 'RECENT SEARCHES';
+  if (normalized.includes('/modules/runtime-errors/')) return 'RUNTIME ERRORS';
+  if (normalized.includes('/modules/cache-state/')) return 'CACHE & STATE';
+  if (normalized.includes('/modules/search-input-robustness/'))
+    return 'SEARCH INPUT ROBUSTNESS';
   if (normalized.includes('/modules/on-enter/')) return 'ON-ENTER';
   if (normalized.includes('/modules/related-searches/')) return 'RELATED SEARCHES';
   if (normalized.includes('/modules/filters-facets/')) return 'FILTERS & FACETS';
@@ -79,11 +95,20 @@ function extractTestId(title = '') {
   const analytics = title.match(/^(AN-Q\d+)\b/i);
   if (analytics) return analytics[1].toUpperCase();
   const match = title.match(
-    /^((?:ON-TYPE|SUG|ENTER|REL|FILTER|SORT|FW)-\d+)\b/i,
+    /^((?:ON-TYPE|SUG|TREND|RECENT|RUNTIME|CACHE|INPUT|ENTER|REL|FILTER|SORT|FW)-\d+)\b/i,
   );
   if (match) return match[1].toUpperCase().replace('ON-TYPE', 'ON-TYPE');
   const m2 = title.match(/^([A-Z]+-\d+)\b/i);
   return m2 ? m2[1].toUpperCase() : '';
+}
+
+function annotationMap(specAnnotations = [], testAnnotations = []) {
+  const map = {};
+  for (const a of [...specAnnotations, ...testAnnotations]) {
+    if (!a?.type) continue;
+    map[a.type] = a.description ?? '';
+  }
+  return map;
 }
 
 function classifyOutcome(results = []) {
@@ -170,6 +195,7 @@ function walkSuites(suites, fileHint, acc) {
       for (const test of spec.tests || []) {
         const outcome = classifyOutcome(test.results || []);
         const title = spec.title || test.title || '';
+        const anns = annotationMap(spec.annotations || [], test.annotations || []);
         const skipFromAnnotation = [...(spec.annotations || []), ...(test.annotations || [])]
           .filter((a) => a?.type === 'skip' || a?.type === 'fix')
           .map((a) => a.description)
@@ -188,6 +214,38 @@ function walkSuites(suites, fileHint, acc) {
           durationMs: outcome.durationMs,
           error: outcome.error,
           skipReason: outcome.skipReason,
+          scenario: anns.scenario || '',
+          trendingQuery: anns.trendingQuery || '',
+          history: anns.history || anns.selectedQuery || '',
+          storageMechanism: anns.storageMechanism || '',
+          historyCreated: anns.historyCreated || '',
+          displayed: anns.displayed || '',
+          isolationResult: anns.isolationResult || '',
+          browser: anns.browser || '',
+          url: anns.url || '',
+          consoleErrors: anns.consoleErrors || '',
+          pageErrors: anns.pageErrors || '',
+          requestFailures: anns.requestFailures || '',
+          http4xx: anns.http4xx || '',
+          http5xx: anns.http5xx || '',
+          unexpectedRuntime: anns.unexpected || '',
+          expectedRuntime: anns.expected || '',
+          ignoredRuntime: anns.ignored || '',
+          errorType: anns.errorType || '',
+          errorMessage: anns.errorMessage || '',
+          errorUrl: anns.errorUrl || '',
+          errorStatus: anns.errorStatus || '',
+          query: anns.query || '',
+          initialQuery: anns.initialQuery || '',
+          transitionQuery: anns.transitionQuery || '',
+          expectedState: anns.expectedState || '',
+          actualState: anns.actualState || '',
+          likelyStateSource: anns.likelyStateSource || '',
+          staleFindings: anns.staleFindings || '',
+          inputCategory: anns.inputCategory || '',
+          inputValue: anns.inputValue || '',
+          dialogDetected: anns.dialogDetected || '',
+          runtimeErrors: anns.runtimeErrors || '',
         });
       }
     }
@@ -392,8 +450,10 @@ for (const name of VIEWPORT_ORDER) {
 md.push('');
 md.push('## Test Case Results');
 md.push('');
-md.push('| Test ID | Module | Test | Viewport | Status | Duration | Notes |');
-md.push('| --- | --- | --- | --- | --- | ---: | --- |');
+md.push(
+  '| Test ID | Module | Scenario | Query/history | Browser | Viewport | Status | Duration | Storage | Failure reason |',
+);
+md.push('| --- | --- | --- | --- | --- | --- | --- | ---: | --- | --- |');
 
 for (const c of summary.tests) {
   const statusLabel =
@@ -406,7 +466,7 @@ for (const c of summary.tests) {
           : c.status === 'skipped'
             ? 'SKIPPED'
             : c.status.toUpperCase();
-  const notes =
+  const failure =
     c.status === 'failed'
       ? (c.error || '').replace(/\|/g, '\\|')
       : c.status === 'skipped'
@@ -414,9 +474,139 @@ for (const c of summary.tests) {
         : c.status === 'recovered'
           ? `Passed on retry (attempt ${c.attempts}); earlier: ${(c.error || 'failure').replace(/\|/g, '\\|')}`
           : '';
+  const scenario = (c.scenario || c.title || '').replace(/\|/g, '\\|');
+  const history =
+    c.module === 'TRENDING NOW'
+      ? c.trendingQuery || '-'
+      : c.historyCreated && c.displayed
+        ? `created ${c.historyCreated} / displayed ${c.displayed}`
+        : c.isolationResult
+          ? `isolation: ${c.isolationResult}`
+          : c.history || c.trendingQuery || '-';
   md.push(
-    `| ${c.testId || '-'} | ${c.module} | ${c.title.replace(/\|/g, '\\|')} | ${c.viewport} | ${statusLabel} | ${formatDuration(c.durationMs)} | ${notes} |`,
+    `| ${c.testId || '-'} | ${c.module} | ${scenario} | ${String(history).replace(/\|/g, '\\|')} | ${(c.browser || '-').replace(/\|/g, '\\|')} | ${c.viewport} | ${statusLabel} | ${formatDuration(c.durationMs)} | ${(c.storageMechanism || '-').replace(/\|/g, '\\|')} | ${failure} |`,
   );
+}
+
+const trendingBucket = byModule['TRENDING NOW'] || emptyBucket();
+if (trendingBucket.total > 0) {
+  md.push('');
+  md.push('## Trending Now');
+  md.push('');
+  md.push('| Metric | Result |');
+  md.push('| --- | ---: |');
+  md.push(`| Total | ${trendingBucket.total} |`);
+  md.push(`| Passed | ${trendingBucket.passed} |`);
+  md.push(`| Failed | ${trendingBucket.failed} |`);
+  md.push(`| Skipped | ${trendingBucket.skipped} |`);
+}
+
+const recentBucket = byModule['RECENT SEARCHES'] || emptyBucket();
+if (recentBucket.total > 0) {
+  md.push('');
+  md.push('## Your Recent Searches');
+  md.push('');
+  md.push('| Metric | Result |');
+  md.push('| --- | ---: |');
+  md.push(`| Total | ${recentBucket.total} |`);
+  md.push(`| Passed | ${recentBucket.passed} |`);
+  md.push(`| Failed | ${recentBucket.failed} |`);
+  md.push(`| Skipped | ${recentBucket.skipped} |`);
+}
+
+const runtimeBucket = byModule['RUNTIME ERRORS'] || emptyBucket();
+if (runtimeBucket.total > 0) {
+  const runtimeCases = cases.filter((c) => c.module === 'RUNTIME ERRORS');
+  const sumAnn = (key) =>
+    runtimeCases.reduce((n, c) => n + (Number.parseInt(c[key], 10) || 0), 0);
+  md.push('');
+  md.push('## Runtime Errors');
+  md.push('');
+  md.push('| Metric | Result |');
+  md.push('| --- | ---: |');
+  md.push(`| Tests | ${runtimeBucket.total} |`);
+  md.push(`| Passed | ${runtimeBucket.passed} |`);
+  md.push(`| Failed | ${runtimeBucket.failed} |`);
+  md.push(`| Skipped | ${runtimeBucket.skipped} |`);
+  md.push(`| Console Errors (sum) | ${sumAnn('consoleErrors')} |`);
+  md.push(`| Page Errors (sum) | ${sumAnn('pageErrors')} |`);
+  md.push(`| Request Failures (sum) | ${sumAnn('requestFailures')} |`);
+  md.push(`| HTTP 4xx (sum) | ${sumAnn('http4xx')} |`);
+  md.push(`| HTTP 5xx (sum) | ${sumAnn('http5xx')} |`);
+  md.push(`| Unexpected (sum) | ${sumAnn('unexpectedRuntime')} |`);
+  md.push(`| Expected (sum) | ${sumAnn('expectedRuntime')} |`);
+  md.push(`| Ignored (sum) | ${sumAnn('ignoredRuntime')} |`);
+  md.push('');
+  md.push('| Test ID | Error Type | Message | URL | Status | Query | Viewport | Browser |');
+  md.push('| --- | --- | --- | --- | --- | --- | --- | --- |');
+  for (const c of runtimeCases.filter((x) => x.status === 'failed' || x.errorType)) {
+    md.push(
+      `| ${c.testId || '-'} | ${(c.errorType || '-').replace(/\|/g, '\\|')} | ${(c.errorMessage || c.error || '-').replace(/\|/g, '\\|')} | ${(c.errorUrl || c.url || '-').replace(/\|/g, '\\|')} | ${(c.errorStatus || '-').replace(/\|/g, '\\|')} | ${(c.query || c.history || '-').replace(/\|/g, '\\|')} | ${c.viewport} | ${(c.browser || '-').replace(/\|/g, '\\|')} |`,
+    );
+  }
+}
+
+const cacheBucket = byModule['CACHE & STATE'] || emptyBucket();
+if (cacheBucket.total > 0) {
+  const cacheCases = cases.filter((c) => c.module === 'CACHE & STATE');
+  md.push('');
+  md.push('## Cache & State');
+  md.push('');
+  md.push('| Metric | Result |');
+  md.push('| --- | ---: |');
+  md.push(`| Tests | ${cacheBucket.total} |`);
+  md.push(`| Passed | ${cacheBucket.passed} |`);
+  md.push(`| Failed | ${cacheBucket.failed} |`);
+  md.push(`| Skipped | ${cacheBucket.skipped} |`);
+  md.push('');
+  md.push('| Test ID | Initial → Transition | Expected | Actual | URL | Viewport | Browser | Likely source |');
+  md.push('| --- | --- | --- | --- | --- | --- | --- | --- |');
+  for (const c of cacheCases) {
+    const transition = [c.initialQuery, c.transitionQuery].filter(Boolean).join(' → ') || c.query || '-';
+    md.push(
+      `| ${c.testId || '-'} | ${String(transition).replace(/\|/g, '\\|')} | ${(c.expectedState || '-').replace(/\|/g, '\\|')} | ${(c.actualState || c.staleFindings || '-').replace(/\|/g, '\\|')} | ${(c.url || '-').replace(/\|/g, '\\|')} | ${c.viewport} | ${(c.browser || '-').replace(/\|/g, '\\|')} | ${(c.likelyStateSource || '-').replace(/\|/g, '\\|')} |`,
+    );
+  }
+}
+
+const inputBucket = byModule['SEARCH INPUT ROBUSTNESS'] || emptyBucket();
+if (inputBucket.total > 0) {
+  const inputCases = cases.filter((c) => c.module === 'SEARCH INPUT ROBUSTNESS');
+  md.push('');
+  md.push('## Search Input Robustness');
+  md.push('');
+  md.push('| Metric | Result |');
+  md.push('| --- | ---: |');
+  md.push(`| Tests | ${inputBucket.total} |`);
+  md.push(`| Passed | ${inputBucket.passed} |`);
+  md.push(`| Failed | ${inputBucket.failed} |`);
+  md.push(`| Skipped | ${inputBucket.skipped} |`);
+  md.push('');
+  md.push(
+    '| Test ID | Category | Input | Browser | Viewport | Status | URL | Runtime errors | Dialog | Failure |',
+  );
+  md.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+  for (const c of inputCases) {
+    const statusLabel =
+      c.status === 'recovered'
+        ? 'RECOVERED AFTER RETRY'
+        : c.status === 'passed'
+          ? 'PASS'
+          : c.status === 'failed'
+            ? 'FAIL'
+            : c.status === 'skipped'
+              ? 'SKIPPED'
+              : c.status.toUpperCase();
+    const failure =
+      c.status === 'failed'
+        ? (c.error || '').replace(/\|/g, '\\|')
+        : c.status === 'skipped'
+          ? (c.skipReason || '').replace(/\|/g, '\\|')
+          : '';
+    md.push(
+      `| ${c.testId || '-'} | ${(c.inputCategory || '-').replace(/\|/g, '\\|')} | ${(c.inputValue || '-').replace(/\|/g, '\\|')} | ${(c.browser || '-').replace(/\|/g, '\\|')} | ${c.viewport} | ${statusLabel} | ${(c.url || '-').replace(/\|/g, '\\|')} | ${(c.runtimeErrors || '-').replace(/\|/g, '\\|')} | ${(c.dialogDetected || '-').replace(/\|/g, '\\|')} | ${failure} |`,
+    );
+  }
 }
 
 if (failures.length) {

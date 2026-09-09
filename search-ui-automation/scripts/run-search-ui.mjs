@@ -23,6 +23,11 @@ const tempJson = path.join(root, 'reports', 'playwright-results.partial.json');
 const SUITES = [
   'src/modules/on-type/tests',
   'src/modules/suggestions/tests',
+  'src/modules/trending-now/tests',
+  'src/modules/recent-searches/tests',
+  'src/modules/runtime-errors/tests',
+  'src/modules/cache-state/tests',
+  'src/modules/search-input-robustness/tests',
   'src/modules/on-enter/tests',
   'src/modules/related-searches/tests',
   'src/modules/filters-facets/tests',

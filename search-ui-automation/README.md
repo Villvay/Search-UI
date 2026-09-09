@@ -9,8 +9,8 @@ This repository contains a Playwright + TypeScript Search UI automation framewor
 | Environment | Default base URL |
 |---|---|
 | QA | `https://qa-baersupply.vercel.app` |
-| Staging | `https://wurthbaersupply.com` (override with `BASE_URL` if needed) |
-| Production | `https://shop.wurthbaerusa.com` |
+| Staging | `https://shop.wurthbaerusa.com` (override with `BASE_URL` if needed) |
+| Production | `https://wurthbaersupply.com` |
 
 Inspected Search entry points:
 
@@ -127,6 +127,9 @@ npx playwright test --grep @responsive
 |---|---|
 | `INCLUDE_SAFARI=1` | Register `desktop-1440-safari` (WebKit). **Off by default** — QA Vercel checkpoint blocks WebKit. |
 | `ANALYTICS_WORKERS=1..4` | Parallel workers for analytics runner (default `1`; smoke defaults to `3`). For **batched**, shards by **viewport/project**, not by query. |
+| `UI_MODULE_WORKERS=1..5` | Concurrent module processes for `test:search-ui:parallel` (default `2`) |
+| `UI_PLAYWRIGHT_WORKERS=1..4` | Playwright `--workers` inside each parallel module (default `2`) |
+| `UI_MODULES` | Comma-separated module ids for parallel runner (`on-type,suggestions,on-enter,filters,sorting`, …) |
 | `ANALYTICS_DATASET` | `default` / `queries-50` (existing) or `top50-sku-nonsku` (new PDF dataset; batched default) |
 | `ANALYTICS_MODULES` | Batched module filter: `on-type`, `suggestions`, `on-enter` (comma-separated; default all three) |
 | `ANALYTICS_PROFILE=smoke` | Use the fixed 15-ID subset from `smoke-query-ids.json` (same dataset file) |
@@ -163,6 +166,16 @@ npm run test
 # On-type / suggestions / on-enter / related-searches modules
 npm run test:on-type
 npm run test:suggestions
+npm run test:trending-now
+npm run test:trending-now:responsive
+npm run test:recent-searches
+npm run test:recent-searches:responsive
+npm run test:runtime-errors
+npm run test:runtime-errors:responsive
+npm run test:cache-state
+npm run test:cache-state:responsive
+npm run test:search-input-robustness
+npm run test:search-input-robustness:responsive
 npm run test:on-enter
 npm run test:related-searches
 npm run test:filters
@@ -173,6 +186,10 @@ npm run test:sku-plp
 
 # Full Search UI suite (feature modules + framework validation × viewports)
 npm run test:search-ui
+
+# Same functional modules in parallel (module-level concurrency)
+UI_MODULE_WORKERS=2 UI_PLAYWRIGHT_WORKERS=2 npm run test:search-ui:parallel
+# Optional: UI_MODULES=on-type,suggestions,filters
 
 # Open last HTML report / regenerate summary from latest JSON
 npm run test:report
@@ -196,6 +213,9 @@ Examples:
 
 ```bash
 ENV=qa npm run test:smoke
+ENV=qa npm run test:smoke:responsive
+ENV=qa npm run test:regression
+ENV=qa npm run test:regression:responsive
 ENV=qa npm run test:analytics:smoke
 ENV=qa npm run test:analytics
 ENV=qa ANALYTICS_WORKERS=2 npm run test:analytics
@@ -206,6 +226,93 @@ SKU_LIMIT=5 ENV=qa npm run test:sku-plp
 ```
 
 Runtime before/after measurements for the fast profiles live in [`reports/runtime-comparison.md`](./reports/runtime-comparison.md).
+
+## Search UI Test Cycles
+
+Orchestration over existing modules (`config/search-ui-cycles.mjs`). Does **not** duplicate tests or change module assertions. Individual module commands remain unchanged.
+
+### Daily Smoke
+
+Fast desktop health check on `desktop-1440` using existing `@smoke` tests:
+
+```bash
+npm run test:smoke
+```
+
+**Includes:** On-Type, Suggestions, On-Enter, Trending Now, Recent Searches, Filters & Facets, Runtime Errors, Cache & State (`@smoke` only — not `CACHE-005`), Search Input Robustness (`INPUT-001` / `007` / `008`), Sorting (`SORT-001` absence contract).
+
+**Excludes:** Related Searches (no `@smoke` IDs), analytics, sku-plp-cache, framework validation.
+
+**Failure policy:** exit `1` only when unexpected failures `> 0`. Skips alone do not fail the cycle.
+
+### Smoke Responsive
+
+Same smoke selection across six Chromium viewports (optional; not the daily default):
+
+```bash
+npm run test:smoke:responsive
+# or: SMOKE_RESPONSIVE=1 npm run test:smoke
+```
+
+### Full Regression
+
+All applicable functional modules on `desktop-1440` (module-level parallel; respects `UI_MODULE_WORKERS` / `UI_PLAYWRIGHT_WORKERS`):
+
+```bash
+npm run test:regression
+```
+
+**Includes:** on-type, suggestions, trending-now, recent-searches, on-enter, related-searches, filters, sorting, runtime-errors, cache-state, search-input-robustness.
+
+**Known defect:** `CACHE-005` stays a failing assertion; the cycle report labels it **KNOWN DEFECT**. Unexpected failures fail the cycle; known defects alone do not.
+
+### Regression Responsive
+
+`@responsive` tests across six viewports:
+
+```bash
+npm run test:regression:responsive
+```
+
+### Cycle report artifacts
+
+| Cycle | JSON | Dashboard | Text summary |
+| --- | --- | --- | --- |
+| Smoke | `reports/search-ui-smoke-report.json` | `reports/html/search-ui-smoke-dashboard.html` | `reports/search-ui-smoke-summary.txt` |
+| Regression | `reports/search-ui-regression-report.json` | `reports/html/search-ui-regression-dashboard.html` | `reports/search-ui-regression-summary.txt` |
+
+### SEARCH UI CI CYCLES (GitHub Actions)
+
+Official execution is via the existing workflows under `.github/workflows/` (cycle runner + `config/search-ui-cycles.mjs` — no duplicate test suites).
+
+| Cycle | Trigger | Command | Notes |
+| --- | --- | --- | --- |
+| **Daily smoke** | Cron `30 0 * * *` UTC (≈ **06:00 Sri Lanka**, UTC+5:30) | `npm run test:smoke` | Chromium `desktop-1440`, `@smoke` only |
+| **Manual smoke** | `workflow_dispatch` | `npm run test:smoke` | Optional `run_responsive=true` → `test:smoke:responsive` |
+| **Manual regression** | `workflow_dispatch` only (not scheduled) | `npm run test:regression` | Optional `run_responsive=true` → `test:regression:responsive` |
+
+**Required secret:** `VERCEL_AUTOMATION_BYPASS_SECRET` (never commit; local `.env` is gitignored).
+
+**Environment:** `ENV=qa` by default (workflow input: `qa` \| `staging` \| `production`). Optional repo variable `BASE_URL` overrides the host when set.
+
+**Artifacts (private Actions artifacts):**
+
+| Cycle | Retention | Paths |
+| --- | --- | --- |
+| Smoke | 14 days | `reports/search-ui-smoke-report.json`, `…-summary.txt`, `reports/html/search-ui-smoke-dashboard.html`; `test-results/` on failure |
+| Regression | 30 days | `reports/search-ui-regression-report.json`, `…-summary.txt`, `reports/html/search-ui-regression-dashboard.html`; `test-results/` on failure |
+
+Responsive runs use a distinct artifact name suffix (`-responsive`) so they do not collide with desktop uploads.
+
+**Concurrency:** one smoke run at a time (newer cancels older); one regression run at a time (in-flight manual runs are not cancelled).
+
+**Exit / failure behavior:**
+
+- Workflow **fails** on TypeScript errors, infrastructure failures, or **unexpected** test failures (cycle exit ≠ 0).
+- Workflow **passes** when all tests pass, or when only catalogued **known defects** remain (e.g. `CACHE-005`).
+- `CACHE-005` stays a failing assertion classified as **KNOWN DEFECT**; it alone must not fail the cycle.
+- Do **not** classify intermittent cases (e.g. ENTER-009) as known defects unless explicitly instructed.
+- Job summaries (`$GITHUB_STEP_SUMMARY`) mirror cycle counts; HTML dashboards remain the detailed report.
 
 ## Reporting
 
@@ -279,6 +386,8 @@ Included:
 - Core `SearchDropdown` component
 - Dropdown / suggestion / product-result / Escape / responsive layout tests
 - `npm run test:suggestions`
+- Independent `src/modules/trending-now/` module
+- `npm run test:trending-now`
 
 ## Step 4 scope
 

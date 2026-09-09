@@ -45,9 +45,19 @@ export async function expectNoResultsPage(
   query: string,
 ): Promise<void> {
   await expectSearchUrlContainsQuery(onEnter.page, query);
+  await onEnter.waitForSearchNavigation(query);
+
+  // Clearer failure when the fixture stops being a zero-hit query on QA.
+  const resultsHeading = onEnter.searchResultsHeading(query);
+  if (await resultsHeading.isVisible().catch(() => false)) {
+    throw new Error(
+      `Expected No Results empty state for query "${query}", but heading "Search Results for …" is visible. Update the ON-ENTER no-result fixture if Search API now returns fuzzy hits for this string.`,
+    );
+  }
+
   await onEnter.waitForNoResultsState();
   await expect(onEnter.input()).toHaveValue(query);
-  await expect(onEnter.searchResultsHeading(query)).toHaveCount(0);
+  await expect(resultsHeading).toHaveCount(0);
 }
 
 export async function expectNoNavigation(

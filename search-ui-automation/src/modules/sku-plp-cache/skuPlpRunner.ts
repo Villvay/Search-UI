@@ -15,6 +15,10 @@ import {
 } from './assertions/skuPlpAssertions';
 import { skusMatch, type SkuDataset } from './data/skuLoader';
 import { SkuPlpPage, productPathKey } from './pages/SkuPlpPage';
+import {
+  getEnvironmentConfig,
+  getVercelBypassHeaders,
+} from '../../../config/environments';
 
 export type SkuSearchRow = {
   index: number;
@@ -136,8 +140,13 @@ export async function runSkuPlpCacheBatch(options: {
   const wallStart = Date.now();
   const results: SkuSearchRow[] = [];
   const sequence = dataset.searchSequence;
+  const isolate = cleanBrowserEachSku();
+  const browser = page.context().browser();
+  const viewport = page.viewportSize() ?? { width: 1440, height: 900 };
 
-  await skuPage.open();
+  if (!isolate) {
+    await skuPage.open();
+  }
 
   let previousSku: string | null = null;
   let previousProductUrl: string | null = null;
@@ -148,17 +157,45 @@ export async function runSkuPlpCacheBatch(options: {
     const label = `[${index}/${sequence.length}]`;
     console.log(`${label} Searching SKU: ${sku}`);
 
-    const row = await runOneSku({
-      skuPage,
-      page,
-      sku,
-      index,
-      total: sequence.length,
-      previousSku,
-      previousProductUrl,
-      sequenceSoFar: previousSku ? [previousSku, sku] : [sku],
-      screenshotDir,
-    });
+    let activePage = page;
+    let activeSkuPage = skuPage;
+    let extraContext = null as Awaited<
+      ReturnType<NonNullable<typeof browser>['newContext']>
+    > | null;
+
+    if (isolate) {
+      if (!browser) {
+        throw new Error('SKU_CLEAN_BROWSER=1 requires a Playwright browser instance');
+      }
+      extraContext = await browser.newContext({
+        viewport,
+        baseURL: getEnvironmentConfig().baseURL,
+        extraHTTPHeaders: getVercelBypassHeaders(),
+      });
+      activePage = await extraContext.newPage();
+      activeSkuPage = new SkuPlpPage(activePage);
+      await activeSkuPage.open();
+    }
+
+    let row: SkuSearchRow;
+    try {
+      row = await runOneSku({
+        skuPage: activeSkuPage,
+        page: activePage,
+        sku,
+        index,
+        total: sequence.length,
+        previousSku: isolate ? null : previousSku,
+        previousProductUrl: isolate ? null : previousProductUrl,
+        sequenceSoFar:
+          isolate || !previousSku ? [sku] : [previousSku, sku],
+        screenshotDir,
+      });
+    } finally {
+      if (extraContext) {
+        await extraContext.close();
+      }
+    }
 
     results.push(row);
     console.log(`${label} URL: ${row.actualUrl}`);
@@ -171,11 +208,16 @@ export async function runSkuPlpCacheBatch(options: {
       console.log(`${label} FAIL — ${row.failureCode ?? row.reason ?? 'unknown'}`);
     }
 
-    previousSku = sku;
-    if (productPathKey(row.actualUrl)) {
-      previousProductUrl = row.actualUrl;
-    } else if (row.landing !== 'product') {
+    if (isolate) {
+      previousSku = null;
       previousProductUrl = null;
+    } else {
+      previousSku = sku;
+      if (productPathKey(row.actualUrl)) {
+        previousProductUrl = row.actualUrl;
+      } else if (row.landing !== 'product') {
+        previousProductUrl = null;
+      }
     }
 
     if (index === 1 || index === sequence.length || index % 25 === 0) {
@@ -351,23 +393,26 @@ async function runOneSku(options: {
           (skuOk
             ? urlCheck.reason
             : `Expected PLP SKU ${sku}, got ${snap.displayedSku ?? '(none)'}`);
-      row.screenshot = await captureFailureScreenshot(
-        page,
-        screenshotDir,
-        index,
-        sku,
-      );
     }
   } catch (error) {
     const timedOut = isTimeoutError(error);
     row.actualUrl = page.url();
+    try {
+      const snap = await skuPage.snapshotLanding(sku);
+      row.actualUrl = snap.url;
+      row.landing = snap.landing;
+      row.actualPlpSku = snap.displayedSku;
+      row.allDisplayedSkus = snap.allDisplayedSkus;
+    } catch {
+      // Keep URL-only evidence if the page is gone.
+    }
     row.failureCode = classifySkuFailure({
       searchCompleted: row.searchCompleted === 'PASS',
       timedOut,
-      landing: 'unknown',
+      landing: row.landing as import('./pages/SkuPlpPage').SkuLandingKind,
       urlOk: false,
       plpLoaded: false,
-      displayedSku: null,
+      displayedSku: row.actualPlpSku,
       skuOk: false,
       cacheBugSuspected: false,
       elementMissing: /locator|element|strict/i.test(formatError(error)),
@@ -382,15 +427,15 @@ async function runOneSku(options: {
     if (row.cacheBugSuspected) {
       row.reason = 'Newly searched SKU loaded the previously searched PLP.';
     }
-    row.screenshot = await captureFailureScreenshot(
+  } finally {
+    page.off('console', onConsole);
+    page.off('response', onResponse);
+    row.screenshot = await captureSkuScreenshot(
       page,
       screenshotDir,
       index,
       sku,
     );
-  } finally {
-    page.off('console', onConsole);
-    page.off('response', onResponse);
     row.durationMs = Date.now() - started;
     if (consoleMessages.length) {
       row.consoleMessages = consoleMessages.slice(-20);
@@ -415,7 +460,12 @@ function isCacheBug(input: {
   return skusMatch(input.actualSku, input.previousSku);
 }
 
-async function captureFailureScreenshot(
+function cleanBrowserEachSku(): boolean {
+  const raw = process.env.SKU_CLEAN_BROWSER?.trim().toLowerCase();
+  return raw === '1' || raw === 'true' || raw === 'yes';
+}
+
+async function captureSkuScreenshot(
   page: Page,
   dir: string,
   index: number,

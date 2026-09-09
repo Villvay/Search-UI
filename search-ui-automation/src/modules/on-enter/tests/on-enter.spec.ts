@@ -129,7 +129,10 @@ test.describe('On-enter search @responsive', () => {
   }) => {
     const onEnter = new OnEnterSearchPage(page);
     await onEnter.open();
-    await onEnter.searchWithEnter(onEnterQueries.noResult.value);
+    // fill: empty-state contract, not keystroke/debounce coverage
+    await onEnter.searchWithEnter(onEnterQueries.noResult.value, {
+      inputMode: 'fill',
+    });
     await expectNoResultsPage(onEnter, onEnterQueries.noResult.value);
   });
 

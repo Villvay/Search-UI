@@ -51,10 +51,22 @@ export const onEnterQueries = {
     value: 'hinge@#$',
     expectedLanding: 'search',
   },
+  /**
+   * Deterministic zero-hit fixture (QA multisearch `summary.total === 0`).
+   *
+   * Previous value `zzzznonexistentproduct12345` is obsolete: Search API now
+   * returns fuzzy/retriever hits (~100 products) and SERP shows
+   * `Search Results for "…"`, so ENTER-009 correctly failed.
+   *
+   * Prefer `inputMode: 'fill'` when submitting this long string (ENTER-009);
+   * sequential typing is unnecessary for empty-state coverage.
+   */
   noResult: {
     id: 'no-result',
-    value: 'zzzznonexistentproduct12345',
+    value: 'qwertyuiopasdfghjklzxcvbnm-nomatch-probe',
     expectedLanding: 'search-no-results',
+    notes:
+      'QA multisearch total=0 (inspected 2026-09-09). Not fuzzy-matched by retriever.',
   },
   empty: {
     id: 'empty',
