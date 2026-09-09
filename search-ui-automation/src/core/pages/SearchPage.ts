@@ -46,7 +46,7 @@ export class SearchPage extends BasePage {
 
       if (blockedEarly) {
         lastError = new Error(
-          `Vercel Security Checkpoint blocked page load (attempt ${attempt}/${maxAttempts}). Set VERCEL_AUTOMATION_BYPASS_SECRET or retry.`,
+          `Vercel Security Checkpoint blocked page load (attempt ${attempt}/${maxAttempts}). Ensure User-Agent jmter-elastic-search is applied, or set VERCEL_AUTOMATION_BYPASS_SECRET.`,
         );
         continue;
       }
@@ -61,7 +61,7 @@ export class SearchPage extends BasePage {
           .catch(() => false);
         if (blockedLate) {
           lastError = new Error(
-            `Vercel Security Checkpoint blocked page load (attempt ${attempt}/${maxAttempts}). Set VERCEL_AUTOMATION_BYPASS_SECRET or retry.`,
+            `Vercel Security Checkpoint blocked page load (attempt ${attempt}/${maxAttempts}). Ensure User-Agent jmter-elastic-search is applied, or set VERCEL_AUTOMATION_BYPASS_SECRET.`,
           );
         }
         if (attempt < maxAttempts) {
@@ -106,7 +106,7 @@ export class SearchPage extends BasePage {
 
       if (blockedEarly) {
         lastError = new Error(
-          `Vercel Security Checkpoint blocked SERP load (attempt ${attempt}/${maxAttempts}). Set VERCEL_AUTOMATION_BYPASS_SECRET or retry.`,
+          `Vercel Security Checkpoint blocked SERP load (attempt ${attempt}/${maxAttempts}). Ensure User-Agent jmter-elastic-search is applied, or set VERCEL_AUTOMATION_BYPASS_SECRET.`,
         );
         continue;
       }
@@ -127,7 +127,7 @@ export class SearchPage extends BasePage {
           .catch(() => false);
         if (blockedLate) {
           lastError = new Error(
-            `Vercel Security Checkpoint blocked SERP load (attempt ${attempt}/${maxAttempts}). Set VERCEL_AUTOMATION_BYPASS_SECRET or retry.`,
+            `Vercel Security Checkpoint blocked SERP load (attempt ${attempt}/${maxAttempts}). Ensure User-Agent jmter-elastic-search is applied, or set VERCEL_AUTOMATION_BYPASS_SECRET.`,
           );
         }
         if (attempt < maxAttempts) {

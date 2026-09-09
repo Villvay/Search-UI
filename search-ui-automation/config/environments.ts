@@ -78,22 +78,40 @@ export function getEnvironmentLabel(config = getEnvironmentConfig()): Environmen
   return config.name;
 }
 
+/**
+ * User-Agent recognized by WBS Vercel edge to skip the Security Checkpoint.
+ * Applied on every browser context (headers + Playwright userAgent).
+ */
+export const AUTOMATION_USER_AGENT = 'jmter-elastic-search';
+
+export function getAutomationUserAgent(): string {
+  return AUTOMATION_USER_AGENT;
+}
+
 export function getVercelBypassSecret(): string | undefined {
   const secret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.trim();
   return secret || undefined;
 }
 
+/**
+ * HTTP headers applied to every Playwright request.
+ * Always includes the automation User-Agent checkpoint bypass.
+ * When VERCEL_AUTOMATION_BYPASS_SECRET is set, also sends official
+ * Vercel protection-bypass headers (and sets the bypass cookie).
+ */
 export function getVercelBypassHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    'User-Agent': AUTOMATION_USER_AGENT,
+  };
+
   const secret = getVercelBypassSecret();
-  if (!secret) {
-    return {};
+  if (secret) {
+    headers['x-vercel-protection-bypass'] = secret;
+    // samesitenone helps WebKit/Safari persist the bypass cookie.
+    headers['x-vercel-set-bypass-cookie'] = 'samesitenone';
   }
 
-  return {
-    'x-vercel-protection-bypass': secret,
-    // samesitenone helps WebKit/Safari persist the bypass cookie.
-    'x-vercel-set-bypass-cookie': 'samesitenone',
-  };
+  return headers;
 }
 
 /**

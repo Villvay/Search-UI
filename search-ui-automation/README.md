@@ -49,7 +49,8 @@ Optional overrides (via `.env` or shell):
 |---|---|
 | `ENV` | `qa` \| `staging` \| `production` (default `qa`) |
 | `BASE_URL` | Override the selected environment’s base URL |
-| `VERCEL_AUTOMATION_BYPASS_SECRET` | Bypass Vercel Deployment Protection when required |
+| `VERCEL_AUTOMATION_BYPASS_SECRET` | Optional Vercel Deployment Protection bypass headers |
+| Automation `User-Agent` | Always sent as `jmter-elastic-search` (Playwright `userAgent` + header) to bypass the Vercel Security Checkpoint for this project |
 
 Do not commit credentials or bypass secrets. Keep them in `.env` (gitignored) or CI secrets.
 
