@@ -291,18 +291,34 @@ Official execution is via the existing workflows under `.github/workflows/` (cyc
 | **Manual smoke** | `workflow_dispatch` | `npm run test:smoke` | Optional `run_responsive=true` → `test:smoke:responsive` |
 | **Manual regression** | `workflow_dispatch` only (not scheduled) | `npm run test:regression` | Optional `run_responsive=true` → `test:regression:responsive` |
 
-**Required secret:** `VERCEL_AUTOMATION_BYPASS_SECRET` (never commit; local `.env` is gitignored).
+**Environments (smoke):** `qa` (daily default) \| `production` (manual). There is no staging option in the smoke workflow.
 
-**Environment:** `ENV=qa` by default (workflow input: `qa` \| `staging` \| `production`). Optional repo variable `BASE_URL` overrides the host when set.
+**Required secrets:**
 
-**Artifacts (private Actions artifacts):**
+| Secret | Purpose |
+| --- | --- |
+| `VERCEL_AUTOMATION_BYPASS_SECRET` | Vercel Deployment Protection bypass |
+| `TEAMS_SEARCH_UI_WEBHOOK` | Microsoft Teams Incoming Webhook for smoke notifications |
 
-| Cycle | Retention | Paths |
-| --- | --- | --- |
-| Smoke | 14 days | `reports/search-ui-smoke-report.json`, `…-summary.txt`, `reports/html/search-ui-smoke-dashboard.html`; `test-results/` on failure |
-| Regression | 30 days | `reports/search-ui-regression-report.json`, `…-summary.txt`, `reports/html/search-ui-regression-dashboard.html`; `test-results/` on failure |
+**Optional repository variables:**
 
-Responsive runs use a distinct artifact name suffix (`-responsive`) so they do not collide with desktop uploads.
+| Variable | Purpose |
+| --- | --- |
+| `BASE_URL_QA` | Override QA base URL (defaults to config `environments.ts`) |
+| `BASE_URL_PROD` | Override Production base URL |
+
+**Artifacts (private Actions artifacts, 14 days for smoke):**
+
+- `reports/search-ui-smoke-report.json`
+- `reports/search-ui-smoke-summary.txt`
+- `reports/html/search-ui-smoke-dashboard.html` (detailed cycle / module / test dashboard)
+- `test-results/` on failure
+
+Teams messages include links to the Actions run and the artifact section (download `search-ui-smoke-dashboard.html`). Local dry-run:
+
+```bash
+npm run notify:smoke:teams:dry-run
+```
 
 **Concurrency:** one smoke run at a time (newer cancels older); one regression run at a time (in-flight manual runs are not cancelled).
 
@@ -313,6 +329,7 @@ Responsive runs use a distinct artifact name suffix (`-responsive`) so they do n
 - `CACHE-005` stays a failing assertion classified as **KNOWN DEFECT**; it alone must not fail the cycle.
 - Do **not** classify intermittent cases (e.g. ENTER-009) as known defects unless explicitly instructed.
 - Job summaries (`$GITHUB_STEP_SUMMARY`) mirror cycle counts; HTML dashboards remain the detailed report.
+- Teams notification runs after the cycle even on failure (`!cancelled`); missing webhook skips with a warning and does not hide smoke failures.
 
 ## Reporting
 

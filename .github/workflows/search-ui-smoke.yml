@@ -11,13 +11,12 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Target environment (qa | staging | production)'
+        description: 'Target environment (qa | production)'
         required: true
         default: 'qa'
         type: choice
         options:
           - qa
-          - staging
           - production
       run_responsive:
         description: 'Also run smoke across all six responsive viewports (optional; not daily default)'
@@ -61,18 +60,36 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
+      - name: Resolve environment URLs
+        id: env
+        env:
+          INPUT_ENV: ${{ github.event.inputs.environment || 'qa' }}
+        run: |
+          TARGET="${INPUT_ENV:-qa}"
+          echo "target=$TARGET" >> "$GITHUB_OUTPUT"
+          if [ "$TARGET" = "production" ]; then
+            echo "base_url=${{ vars.BASE_URL_PROD }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "base_url=${{ vars.BASE_URL_QA }}" >> "$GITHUB_OUTPUT"
+          fi
+          if [ "${{ github.event.inputs.run_responsive }}" = "true" ]; then
+            echo "artifact_name=search-ui-smoke-reports-responsive" >> "$GITHUB_OUTPUT"
+          else
+            echo "artifact_name=search-ui-smoke-reports" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run Search UI smoke cycle
         id: smoke_run
         env:
-          ENV: ${{ github.event.inputs.environment || 'qa' }}
-          BASE_URL: ${{ vars.BASE_URL }}
+          ENV: ${{ steps.env.outputs.target }}
+          BASE_URL: ${{ steps.env.outputs.base_url }}
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
-          # Existing cycle defaults: module workers 3, playwright workers 2, retries 1
           UI_MODULE_WORKERS: '3'
           UI_PLAYWRIGHT_WORKERS: '2'
           PLAYWRIGHT_RETRIES: '1'
           PLAYWRIGHT_HTML_OPEN: never
           CI: 'true'
+          SMOKE_ARTIFACT_NAME: ${{ steps.env.outputs.artifact_name }}
         run: |
           if [ "${{ github.event.inputs.run_responsive }}" = "true" ]; then
             npm run test:smoke:responsive
@@ -80,30 +97,63 @@ jobs:
             npm run test:smoke
           fi
 
+      - name: Upload smoke reports
+        id: upload_reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.env.outputs.artifact_name }}
+          retention-days: 14
+          path: |
+            search-ui-automation/reports/search-ui-smoke-report.json
+            search-ui-automation/reports/search-ui-smoke-summary.txt
+            search-ui-automation/reports/html/search-ui-smoke-dashboard.html
+            search-ui-automation/reports/search-ui-summary.json
+            search-ui-automation/reports/search-ui-summary.md
+            search-ui-automation/reports/search-ui-playwright-results.json
+          if-no-files-found: warn
+
+      - name: Upload Playwright failure artifacts
+        if: ${{ !cancelled() && failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.env.outputs.artifact_name }}-test-results
+          retention-days: 14
+          path: search-ui-automation/test-results/
+          if-no-files-found: ignore
+
       - name: Write GitHub Step Summary
         if: ${{ !cancelled() }}
         working-directory: search-ui-automation
         env:
           REPORT_PATH: reports/search-ui-smoke-report.json
-          FALLBACK_ENV: ${{ github.event.inputs.environment || 'qa' }}
+          FALLBACK_ENV: ${{ steps.env.outputs.target }}
           RUN_RESPONSIVE: ${{ github.event.inputs.run_responsive == 'true' && 'true' || 'false' }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ARTIFACT_NAME: ${{ steps.env.outputs.artifact_name }}
         run: |
           node <<'EOF'
           const fs = require('fs');
           const path = process.env.REPORT_PATH;
           const out = process.env.GITHUB_STEP_SUMMARY;
+          const runUrl = process.env.RUN_URL || '';
+          const artifact = process.env.ARTIFACT_NAME || 'search-ui-smoke-reports';
           const lines = [];
           lines.push('## Search UI Smoke Cycle');
           if (!fs.existsSync(path)) {
             lines.push('');
             lines.push('Report artifact missing — cycle may have failed before report generation.');
             lines.push('');
-            lines.push(`| Field | Value |`);
-            lines.push(`| --- | --- |`);
-            lines.push(`| Cycle | Smoke |`);
+            lines.push('| Field | Value |');
+            lines.push('| --- | --- |');
+            lines.push('| Cycle | Smoke |');
             lines.push(`| Environment | ${String(process.env.FALLBACK_ENV || 'qa').toUpperCase()} |`);
             lines.push(`| Responsive | ${process.env.RUN_RESPONSIVE === 'true' ? 'requested' : 'not run'} |`);
-            lines.push(`| Final result | FAIL |`);
+            lines.push('| Final result | FAIL |');
+            if (runUrl) {
+              lines.push('');
+              lines.push(`[View GitHub Actions Run](${runUrl})`);
+            }
             fs.appendFileSync(out, lines.join('\n') + '\n');
             process.exit(0);
           }
@@ -121,17 +171,17 @@ jobs:
                 : `${durationSec}s`;
           const final =
             c.result === 'PASS' || c.result === 'PASS (KNOWN DEFECTS)'
-              ? 'PASS'
+              ? (c.result === 'PASS (KNOWN DEFECTS)' ? 'PASS (KNOWN DEFECTS)' : 'PASS')
               : 'FAIL';
           const responsive = c.responsive
-            ? final === 'PASS'
+            ? final.startsWith('PASS')
               ? 'passed'
               : 'failed'
             : 'not run';
           lines.push('');
           lines.push('| Field | Value |');
           lines.push('| --- | --- |');
-          lines.push(`| Cycle | Smoke |`);
+          lines.push('| Cycle | Smoke |');
           lines.push(`| Environment | ${c.environment || String(process.env.FALLBACK_ENV || 'qa').toUpperCase()} |`);
           lines.push(`| Browser | ${c.browser || 'Chromium'} |`);
           lines.push(`| Projects | ${(c.projects || []).join(', ') || 'desktop-1440'} |`);
@@ -145,6 +195,13 @@ jobs:
           lines.push(`| Unexpected failures | ${counts.unexpectedFailures ?? 'n/a'} |`);
           lines.push(`| Responsive | ${responsive} |`);
           lines.push(`| Final result | **${final}** |`);
+          lines.push('');
+          lines.push('### Links');
+          lines.push(`- Dashboard artifact: \`${artifact}\` → \`search-ui-smoke-dashboard.html\``);
+          if (runUrl) {
+            lines.push(`- [View GitHub Actions Run](${runUrl})`);
+            lines.push(`- [Open run artifacts](${runUrl}#artifacts)`);
+          }
           if (c.result === 'PASS (KNOWN DEFECTS)') {
             lines.push('');
             lines.push('_Cycle passed with known defects (does not fail the gate alone)._');
@@ -152,26 +209,17 @@ jobs:
           fs.appendFileSync(out, lines.join('\n') + '\n');
           EOF
 
-      - name: Upload smoke reports
+      - name: Notify Microsoft Teams
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: search-ui-smoke-reports${{ github.event.inputs.run_responsive == 'true' && '-responsive' || '' }}
-          retention-days: 14
-          path: |
-            search-ui-automation/reports/search-ui-smoke-report.json
-            search-ui-automation/reports/search-ui-smoke-summary.txt
-            search-ui-automation/reports/html/search-ui-smoke-dashboard.html
-            search-ui-automation/reports/search-ui-summary.json
-            search-ui-automation/reports/search-ui-summary.md
-            search-ui-automation/reports/search-ui-playwright-results.json
-          if-no-files-found: warn
-
-      - name: Upload Playwright failure artifacts
-        if: ${{ !cancelled() && failure() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: search-ui-smoke-test-results${{ github.event.inputs.run_responsive == 'true' && '-responsive' || '' }}
-          retention-days: 14
-          path: search-ui-automation/test-results/
-          if-no-files-found: ignore
+        working-directory: search-ui-automation
+        env:
+          TEAMS_SEARCH_UI_WEBHOOK: ${{ secrets.TEAMS_SEARCH_UI_WEBHOOK }}
+          SMOKE_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SMOKE_DASHBOARD_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts
+          SMOKE_ARTIFACT_NAME: ${{ steps.env.outputs.artifact_name }}
+        run: |
+          if [ -z "${TEAMS_SEARCH_UI_WEBHOOK}" ]; then
+            echo "::warning::TEAMS_SEARCH_UI_WEBHOOK secret is not configured. Skipping Teams notification."
+            exit 0
+          fi
+          node scripts/notify-search-ui-teams.mjs --report=reports/search-ui-smoke-report.json
