@@ -304,9 +304,10 @@ Official execution is via the existing workflows under `.github/workflows/` (cyc
 
 | Variable | Purpose |
 | --- | --- |
-| `BASE_URL_QA` | Override QA base URL (defaults to config `environments.ts`) |
-| `BASE_URL_PROD` | Override Production base URL |
+| `BASE_URL_QA` | Override QA base URL (optional; default `https://qa-baersupply.vercel.app`) |
+| `BASE_URL_PROD` | Override Production base URL (optional; default `https://wurthbaersupply.com`) |
 
+If these variables are unset, smoke uses the defaults in `config/environments.ts`. Do **not** set them to an empty value — that previously caused `Cannot navigate to invalid URL` in CI.
 **Artifacts (private Actions artifacts, 14 days for smoke):**
 
 - `reports/search-ui-smoke-report.json`
