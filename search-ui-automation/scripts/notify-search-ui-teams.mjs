@@ -1,6 +1,9 @@
 /**
  * Build / send a concise Microsoft Teams notification for Search UI smoke cycles.
  *
+ * Uses Adaptive Card payload for Teams Workflow webhooks
+ * ("Post to a channel when a webhook request is received").
+ *
  *   node scripts/notify-search-ui-teams.mjs --report=reports/search-ui-smoke-report.json --dry-run
  *   node scripts/notify-search-ui-teams.mjs --report=reports/search-ui-smoke-report.json
  *
@@ -46,12 +49,32 @@ function fmtDuration(ms) {
 function cycleOutcome(cycle) {
   const result = cycle?.result || '';
   if (result === 'FAILED' || result === 'FAIL') {
-    return { label: 'FAIL', emoji: '🔴', themeColor: 'B42318' };
+    return {
+      label: 'FAIL',
+      emoji: '🔴',
+      color: 'Attention',
+    };
   }
   if (result === 'PASS (KNOWN DEFECTS)') {
-    return { label: 'PASS — Known Defects', emoji: '🟢', themeColor: '9A6700' };
+    return {
+      label: 'PASS — Known Defects',
+      emoji: '🟢',
+      color: 'Warning',
+    };
   }
-  return { label: 'PASS', emoji: '🟢', themeColor: '1B7F4A' };
+  return {
+    label: 'PASS',
+    emoji: '🟢',
+    color: 'Good',
+  };
+}
+
+function resolveLinks(opts) {
+  const runUrl = opts.runUrl || '';
+  const dashboardUrl =
+    opts.dashboardUrl ||
+    (runUrl ? `${runUrl.replace(/#.*$/, '')}#artifacts` : '');
+  return { runUrl, dashboardUrl };
 }
 
 function buildTextMessage(report, opts) {
@@ -60,6 +83,7 @@ function buildTextMessage(report, opts) {
   const env = cycle.environment || 'QA';
   const outcome = cycleOutcome(cycle);
   const projects = (cycle.projects || ['desktop-1440']).join(', ');
+  const { runUrl, dashboardUrl } = resolveLinks(opts);
   const lines = [];
   lines.push(`🔍 Search UI Daily Smoke — ${env}`);
   lines.push('');
@@ -100,19 +124,15 @@ function buildTextMessage(report, opts) {
   }
 
   lines.push('');
-  if (opts.dashboardUrl) {
-    lines.push(`📊 View Detailed Dashboard: ${opts.dashboardUrl}`);
-  } else if (opts.runUrl) {
-    lines.push(
-      `📊 View Detailed Dashboard: ${opts.runUrl} (Artifacts → ${opts.artifactName} → search-ui-smoke-dashboard.html)`,
-    );
+  if (dashboardUrl) {
+    lines.push(`📊 View Detailed Dashboard: ${dashboardUrl}`);
   } else {
     lines.push(
       `📊 View Detailed Dashboard: GitHub Actions Artifacts → ${opts.artifactName}`,
     );
   }
-  if (opts.runUrl) {
-    lines.push(`🔗 View GitHub Actions Run: ${opts.runUrl}`);
+  if (runUrl) {
+    lines.push(`🔗 View GitHub Actions Run: ${runUrl}`);
   } else {
     lines.push('🔗 View GitHub Actions Run: (unavailable outside CI)');
   }
@@ -120,41 +140,155 @@ function buildTextMessage(report, opts) {
   return lines.join('\n');
 }
 
-function buildTeamsPayload(report, opts) {
+/**
+ * Adaptive Card wrapped for Teams Workflow HTTP webhook triggers.
+ * @see https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using
+ */
+function buildAdaptiveCard(report, opts) {
   const cycle = report.cycle || {};
+  const counts = cycle.counts || {};
+  const env = cycle.environment || 'QA';
   const outcome = cycleOutcome(cycle);
-  const text = buildTextMessage(report, opts);
-  const actions = [];
-  if (opts.dashboardUrl) {
-    actions.push({
-      '@type': 'OpenUri',
-      name: 'View Detailed Dashboard',
-      targets: [{ os: 'default', uri: opts.dashboardUrl }],
-    });
-  } else if (opts.runUrl) {
-    actions.push({
-      '@type': 'OpenUri',
-      name: 'View Detailed Dashboard (Artifacts)',
-      targets: [{ os: 'default', uri: opts.runUrl }],
+  const projects = (cycle.projects || ['desktop-1440']).join(', ');
+  const { runUrl, dashboardUrl } = resolveLinks(opts);
+
+  const facts = [
+    { title: 'Total', value: String(counts.total ?? 'n/a') },
+    { title: 'Passed', value: String(counts.passed ?? 'n/a') },
+    { title: 'Failed', value: String(counts.failed ?? 'n/a') },
+    { title: 'Skipped', value: String(counts.skipped ?? 'n/a') },
+    { title: 'Known Defects', value: String(counts.knownDefects ?? 'n/a') },
+  ];
+  if ((counts.unexpectedFailures ?? counts.failed ?? 0) > 0) {
+    facts.push({
+      title: 'Unexpected Failures',
+      value: String(counts.unexpectedFailures ?? counts.failed),
     });
   }
-  if (opts.runUrl) {
-    actions.push({
-      '@type': 'OpenUri',
-      name: 'View GitHub Actions Run',
-      targets: [{ os: 'default', uri: opts.runUrl }],
+  facts.push(
+    { title: 'Duration', value: fmtDuration(cycle.wallClockMs) },
+    { title: 'Browser', value: cycle.browser || 'Chromium' },
+    { title: 'Viewport', value: projects },
+  );
+
+  const body = [
+    {
+      type: 'TextBlock',
+      size: 'Large',
+      weight: 'Bolder',
+      text: `🔍 Search UI Daily Smoke — ${env}`,
+      wrap: true,
+    },
+    {
+      type: 'TextBlock',
+      size: 'Medium',
+      weight: 'Bolder',
+      text: `${outcome.emoji} ${outcome.label}`,
+      color: outcome.color,
+      wrap: true,
+      spacing: 'Small',
+    },
+    {
+      type: 'FactSet',
+      facts,
+      spacing: 'Medium',
+    },
+  ];
+
+  const known = (report.tests || []).filter((t) => t.cycleStatus === 'KNOWN DEFECT');
+  if (known.length) {
+    body.push({
+      type: 'TextBlock',
+      weight: 'Bolder',
+      text: 'Known Defect',
+      spacing: 'Medium',
+      wrap: true,
+    });
+    body.push({
+      type: 'TextBlock',
+      text: known
+        .slice(0, 5)
+        .map((t) => {
+          const reason = (t.knownDefectReason || t.error || 'known defect')
+            .split('\n')[0]
+            .slice(0, 120);
+          return `• **${t.testId}** — ${reason}`;
+        })
+        .join('\n'),
+      wrap: true,
     });
   }
 
-  // Classic Incoming Webhook MessageCard (widely supported).
+  const failed = (report.tests || []).filter(
+    (t) => t.status === 'failed' && t.cycleStatus !== 'KNOWN DEFECT',
+  );
+  if (failed.length) {
+    body.push({
+      type: 'TextBlock',
+      weight: 'Bolder',
+      text: 'Failed Tests',
+      color: 'Attention',
+      spacing: 'Medium',
+      wrap: true,
+    });
+    body.push({
+      type: 'TextBlock',
+      text: failed
+        .slice(0, 8)
+        .map((t) => `• ${t.testId || t.title || 'unknown'}`)
+        .join('\n'),
+      wrap: true,
+    });
+  }
+
+  if (!dashboardUrl && !runUrl) {
+    body.push({
+      type: 'TextBlock',
+      text: `Dashboard artifact: \`${opts.artifactName}\` → search-ui-smoke-dashboard.html`,
+      isSubtle: true,
+      wrap: true,
+      spacing: 'Medium',
+    });
+  }
+
+  const actions = [];
+  if (dashboardUrl) {
+    actions.push({
+      type: 'Action.OpenUrl',
+      title: '📊 View Detailed Dashboard',
+      url: dashboardUrl,
+    });
+  }
+  if (runUrl) {
+    actions.push({
+      type: 'Action.OpenUrl',
+      title: '🔗 View GitHub Actions Run',
+      url: runUrl,
+    });
+  }
+
   return {
-    '@type': 'MessageCard',
-    '@context': 'https://schema.org/extensions',
-    summary: `Search UI Daily Smoke — ${cycle.environment || 'QA'} — ${outcome.label}`,
-    themeColor: outcome.themeColor,
-    title: `Search UI Daily Smoke — ${cycle.environment || 'QA'}`,
-    text: text.replace(/\n/g, '<br/>'),
-    potentialAction: actions,
+    $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
+    type: 'AdaptiveCard',
+    version: '1.4',
+    msteams: { width: 'Full' },
+    body,
+    actions,
+  };
+}
+
+/** Workflow webhook envelope expected by Teams Power Automate HTTP triggers. */
+function buildTeamsPayload(report, opts) {
+  const card = buildAdaptiveCard(report, opts);
+  return {
+    type: 'message',
+    attachments: [
+      {
+        contentType: 'application/vnd.microsoft.teams.card.adaptive',
+        contentUrl: null,
+        content: card,
+      },
+    ],
   };
 }
 
@@ -166,7 +300,9 @@ async function postWebhook(webhookUrl, payload) {
   });
   if (!res.ok) {
     const body = await res.text().catch(() => '');
-    throw new Error(`Teams webhook failed: HTTP ${res.status}${body ? ` — ${body.slice(0, 200)}` : ''}`);
+    throw new Error(
+      `Teams webhook failed: HTTP ${res.status}${body ? ` — ${body.slice(0, 200)}` : ''}`,
+    );
   }
 }
 
@@ -186,7 +322,7 @@ async function main() {
     (ci.repository && ci.runId
       ? `${(ci.serverUrl || 'https://github.com').replace(/\/$/, '')}/${ci.repository}/actions/runs/${ci.runId}`
       : '');
-  const dashboardUrl = args.dashboardUrl || ci.dashboardUrl || runUrl || '';
+  const dashboardUrl = args.dashboardUrl || ci.dashboardUrl || '';
 
   const opts = {
     runUrl,
@@ -200,7 +336,7 @@ async function main() {
   if (args.dryRun) {
     console.log('=== Teams notification (dry-run text) ===');
     console.log(text);
-    console.log('\n=== Teams MessageCard payload (secrets redacted) ===');
+    console.log('\n=== Teams Workflow Adaptive Card payload (secrets redacted) ===');
     console.log(JSON.stringify(payload, null, 2));
     process.exit(0);
   }
@@ -214,7 +350,7 @@ async function main() {
   }
 
   await postWebhook(webhook, payload);
-  console.log('Teams smoke notification sent.');
+  console.log('Teams smoke notification sent (Adaptive Card / Workflow webhook).');
 }
 
 main().catch((err) => {
