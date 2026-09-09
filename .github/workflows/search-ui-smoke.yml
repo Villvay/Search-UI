@@ -17,7 +17,6 @@ on:
         type: choice
         options:
           - qa
-          - staging
           - production
       run_responsive:
         description: 'Also run smoke across all six responsive viewports (optional; not daily default)'
