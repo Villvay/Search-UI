@@ -29,7 +29,9 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write # push published smoke HTML to gh-pages for a clickable Teams dashboard link
+  pages: write
+  id-token: write
 
 jobs:
   smoke:
@@ -141,6 +143,57 @@ jobs:
           path: search-ui-automation/test-results/
           if-no-files-found: ignore
 
+      - name: Prepare smoke HTML for GitHub Pages
+        id: pages_prep
+        if: ${{ !cancelled() }}
+        working-directory: search-ui-automation
+        run: |
+          SRC="reports/html/search-ui-smoke-dashboard.html"
+          OUT="reports/html/smoke-pages"
+          RUN_DIR="$OUT/runs/${{ github.run_id }}"
+          rm -rf "$OUT"
+          mkdir -p "$RUN_DIR"
+          if [ -f "$SRC" ]; then
+            cp "$SRC" "$OUT/index.html"
+            cp "$SRC" "$RUN_DIR/index.html"
+            echo "prepared=true" >> "$GITHUB_OUTPUT"
+            echo "Prepared Pages bundle from $SRC"
+          else
+            echo "prepared=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Missing $SRC — cannot publish clickable HTML dashboard."
+          fi
+
+      - name: Publish smoke dashboard to gh-pages
+        id: pages_publish
+        if: ${{ !cancelled() && steps.pages_prep.outputs.prepared == 'true' }}
+        continue-on-error: true
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: search-ui-automation/reports/html/smoke-pages
+          destination_dir: smoke
+          keep_files: true
+          commit_message: 'Publish Search UI smoke dashboard (run ${{ github.run_id }})'
+
+      - name: Resolve Teams / summary links
+        id: links
+        if: ${{ !cancelled() }}
+        run: |
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo "run_url=${RUN_URL}" >> "$GITHUB_OUTPUT"
+
+          OWNER="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+          REPO="${{ github.event.repository.name }}"
+          DASHBOARD_URL="https://${OWNER}.github.io/${REPO}/smoke/runs/${{ github.run_id }}/"
+
+          if [ "${{ steps.pages_publish.outcome }}" = "success" ]; then
+            echo "dashboard_url=${DASHBOARD_URL}" >> "$GITHUB_OUTPUT"
+            echo "Published HTML dashboard: ${DASHBOARD_URL}"
+          else
+            echo "dashboard_url=" >> "$GITHUB_OUTPUT"
+            echo "::warning::GitHub Pages publish did not succeed. Enable Pages: Settings → Pages → Build and deployment → Deploy from branch → gh-pages / (root). Teams will only include the Actions run link until then."
+          fi
+
       - name: Write GitHub Step Summary
         if: ${{ !cancelled() }}
         working-directory: search-ui-automation
@@ -148,7 +201,8 @@ jobs:
           REPORT_PATH: reports/search-ui-smoke-report.json
           FALLBACK_ENV: ${{ steps.env.outputs.target }}
           RUN_RESPONSIVE: ${{ github.event.inputs.run_responsive == 'true' && 'true' || 'false' }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RUN_URL: ${{ steps.links.outputs.run_url }}
+          DASHBOARD_URL: ${{ steps.links.outputs.dashboard_url }}
           ARTIFACT_NAME: ${{ steps.env.outputs.artifact_name }}
         run: |
           node <<'EOF'
@@ -156,6 +210,7 @@ jobs:
           const path = process.env.REPORT_PATH;
           const out = process.env.GITHUB_STEP_SUMMARY;
           const runUrl = process.env.RUN_URL || '';
+          const dashboardUrl = process.env.DASHBOARD_URL || '';
           const artifact = process.env.ARTIFACT_NAME || 'search-ui-smoke-reports';
           const lines = [];
           lines.push('## Search UI Smoke Cycle');
@@ -216,10 +271,13 @@ jobs:
           lines.push(`| Final result | **${final}** |`);
           lines.push('');
           lines.push('### Links');
-          lines.push(`- Dashboard artifact: \`${artifact}\` → \`search-ui-smoke-dashboard.html\``);
+          if (dashboardUrl) {
+            lines.push(`- [View Detailed Dashboard (HTML)](${dashboardUrl})`);
+          } else {
+            lines.push(`- Dashboard HTML: download \`${artifact}\` → \`search-ui-smoke-dashboard.html\` (Pages publish unavailable)`);
+          }
           if (runUrl) {
             lines.push(`- [View GitHub Actions Run](${runUrl})`);
-            lines.push(`- [Open run artifacts](${runUrl}#artifacts)`);
           }
           if (c.result === 'PASS (KNOWN DEFECTS)') {
             lines.push('');
@@ -233,8 +291,8 @@ jobs:
         working-directory: search-ui-automation
         env:
           TEAMS_SEARCH_UI_WEBHOOK: ${{ secrets.TEAMS_SEARCH_UI_WEBHOOK }}
-          SMOKE_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          SMOKE_DASHBOARD_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts
+          SMOKE_RUN_URL: ${{ steps.links.outputs.run_url }}
+          SMOKE_DASHBOARD_URL: ${{ steps.links.outputs.dashboard_url }}
           SMOKE_ARTIFACT_NAME: ${{ steps.env.outputs.artifact_name }}
         run: |
           if [ -z "${TEAMS_SEARCH_UI_WEBHOOK}" ]; then

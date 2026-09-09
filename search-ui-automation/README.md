@@ -316,7 +316,22 @@ If these variables are unset, smoke uses the defaults in `config/environments.ts
 - `reports/html/search-ui-smoke-dashboard.html` (detailed cycle / module / test dashboard)
 - `test-results/` on failure
 
-Teams messages use a **Workflow Adaptive Card** with clickable actions for the Actions run and the artifact section (download `search-ui-smoke-dashboard.html`). Local dry-run:
+Teams messages use a **Workflow Adaptive Card** with two distinct actions:
+
+- **View Detailed Dashboard** → published HTML on GitHub Pages  
+  `https://<org>.github.io/Search-UI/smoke/runs/<run_id>/`
+- **View GitHub Actions Run** → the workflow run page
+
+**One-time GitHub Pages setup (required for the Dashboard button):**
+
+1. Repo **Settings → Pages**
+2. Build and deployment → **Deploy from a branch**
+3. Branch: `gh-pages` / folder: `/ (root)`
+4. Save (the smoke workflow creates/updates `gh-pages` automatically)
+
+Until Pages is enabled, the Teams card only shows the Actions run link (artifact zips cannot open as HTML in a browser).
+
+Local dry-run:
 
 ```bash
 npm run notify:smoke:teams:dry-run

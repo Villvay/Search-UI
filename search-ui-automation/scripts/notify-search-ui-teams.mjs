@@ -70,10 +70,20 @@ function cycleOutcome(cycle) {
 }
 
 function resolveLinks(opts) {
-  const runUrl = opts.runUrl || '';
-  const dashboardUrl =
-    opts.dashboardUrl ||
-    (runUrl ? `${runUrl.replace(/#.*$/, '')}#artifacts` : '');
+  const runUrl = (opts.runUrl || '').trim();
+  let dashboardUrl = (opts.dashboardUrl || '').trim();
+
+  // Artifact / run tabs are not viewable HTML — never treat them as the dashboard.
+  const runBase = runUrl.replace(/#.*$/, '');
+  const dashBase = dashboardUrl.replace(/#.*$/, '');
+  if (
+    !dashboardUrl ||
+    dashboardUrl.includes('#artifacts') ||
+    (runBase && dashBase === runBase)
+  ) {
+    dashboardUrl = '';
+  }
+
   return { runUrl, dashboardUrl };
 }
 
@@ -128,7 +138,7 @@ function buildTextMessage(report, opts) {
     lines.push(`📊 View Detailed Dashboard: ${dashboardUrl}`);
   } else {
     lines.push(
-      `📊 View Detailed Dashboard: GitHub Actions Artifacts → ${opts.artifactName}`,
+      `📊 View Detailed Dashboard: unavailable (publish HTML to GitHub Pages; artifact zip is not a browser URL)`,
     );
   }
   if (runUrl) {
@@ -241,10 +251,12 @@ function buildAdaptiveCard(report, opts) {
     });
   }
 
-  if (!dashboardUrl && !runUrl) {
+  if (!dashboardUrl) {
     body.push({
       type: 'TextBlock',
-      text: `Dashboard artifact: \`${opts.artifactName}\` → search-ui-smoke-dashboard.html`,
+      text: runUrl
+        ? 'HTML dashboard link unavailable until GitHub Pages publish succeeds. Download `search-ui-smoke-dashboard.html` from the Actions run artifacts if needed.'
+        : `Dashboard artifact: \`${opts.artifactName}\` → search-ui-smoke-dashboard.html`,
       isSubtle: true,
       wrap: true,
       spacing: 'Medium',
