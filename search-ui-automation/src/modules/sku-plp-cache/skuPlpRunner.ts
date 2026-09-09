@@ -17,6 +17,7 @@ import { skusMatch, type SkuDataset } from './data/skuLoader';
 import { SkuPlpPage, productPathKey } from './pages/SkuPlpPage';
 import {
   getEnvironmentConfig,
+  getAutomationUserAgent,
   getVercelBypassHeaders,
 } from '../../../config/environments';
 
@@ -170,6 +171,7 @@ export async function runSkuPlpCacheBatch(options: {
       extraContext = await browser.newContext({
         viewport,
         baseURL: getEnvironmentConfig().baseURL,
+        userAgent: getAutomationUserAgent(),
         extraHTTPHeaders: getVercelBypassHeaders(),
       });
       activePage = await extraContext.newPage();

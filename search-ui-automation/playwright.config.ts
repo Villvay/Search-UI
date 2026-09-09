@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import {
   getEnvironmentConfig,
+  getAutomationUserAgent,
   getVercelBypassHeaders,
 } from './config/environments';
 import {
@@ -16,6 +17,7 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const environment = getEnvironmentConfig();
 const bypassHeaders = getVercelBypassHeaders();
+const automationUserAgent = getAutomationUserAgent();
 const desktop1440 = getViewportById('desktop-1440');
 const includeSafari = isSafariIncluded();
 
@@ -96,6 +98,8 @@ export default defineConfig({
   outputDir: 'test-results',
   use: {
     baseURL: environment.baseURL,
+    // Checkpoint bypass: custom UA recognized by Vercel edge for this project.
+    userAgent: automationUserAgent,
     // Full-suite / analytics JSON runs keep screenshots/traces off to save disk.
     // FORCE_FAILURE_SCREENSHOTS=1 keeps only-on-failure PNGs during JSON shard runs.
     trace: process.env.SEARCH_UI_JSON ? 'off' : 'on-first-retry',
