@@ -1,0 +1,177 @@
+name: Search UI Regression
+
+# Manual full Search UI functional regression (not scheduled daily).
+# Use after releases or major Search UI changes.
+# Uses existing cycle runner: npm run test:regression
+# Exit policy: unexpected failures fail; CACHE-005 known defect alone does not.
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment (qa | staging | production)'
+        required: true
+        default: 'qa'
+        type: choice
+        options:
+          - qa
+          - staging
+          - production
+      run_responsive:
+        description: 'Run @responsive regression across six viewports (longer; optional)'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: search-ui-regression
+  # Do not cancel an in-flight manual regression when another is triggered.
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    name: Regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: search-ui-automation
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: search-ui-automation/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Search UI regression cycle
+        id: regression_run
+        env:
+          ENV: ${{ github.event.inputs.environment || 'qa' }}
+          BASE_URL: ${{ vars.BASE_URL }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          # Existing cycle defaults: module workers 2, playwright workers 2, retries 1
+          UI_MODULE_WORKERS: '2'
+          UI_PLAYWRIGHT_WORKERS: '2'
+          PLAYWRIGHT_RETRIES: '1'
+          PLAYWRIGHT_HTML_OPEN: never
+          CI: 'true'
+        run: |
+          if [ "${{ github.event.inputs.run_responsive }}" = "true" ]; then
+            npm run test:regression:responsive
+          else
+            npm run test:regression
+          fi
+
+      - name: Write GitHub Step Summary
+        if: ${{ !cancelled() }}
+        working-directory: search-ui-automation
+        env:
+          REPORT_PATH: reports/search-ui-regression-report.json
+          FALLBACK_ENV: ${{ github.event.inputs.environment || 'qa' }}
+          RUN_RESPONSIVE: ${{ github.event.inputs.run_responsive == 'true' && 'true' || 'false' }}
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+          const path = process.env.REPORT_PATH;
+          const out = process.env.GITHUB_STEP_SUMMARY;
+          const lines = [];
+          lines.push('## Search UI Regression Cycle');
+          if (!fs.existsSync(path)) {
+            lines.push('');
+            lines.push('Report artifact missing — cycle may have failed before report generation.');
+            lines.push('');
+            lines.push(`| Field | Value |`);
+            lines.push(`| --- | --- |`);
+            lines.push(`| Cycle | Regression |`);
+            lines.push(`| Environment | ${String(process.env.FALLBACK_ENV || 'qa').toUpperCase()} |`);
+            lines.push(`| Responsive | ${process.env.RUN_RESPONSIVE === 'true' ? 'requested' : 'not run'} |`);
+            lines.push(`| Final result | FAIL |`);
+            fs.appendFileSync(out, lines.join('\n') + '\n');
+            process.exit(0);
+          }
+          const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const c = report.cycle || {};
+          const counts = c.counts || {};
+          const durationSec = typeof c.wallClockMs === 'number'
+            ? Math.round(c.wallClockMs / 1000)
+            : null;
+          const duration =
+            durationSec == null
+              ? 'n/a'
+              : durationSec >= 60
+                ? `${Math.floor(durationSec / 60)}m ${durationSec % 60}s`
+                : `${durationSec}s`;
+          const final =
+            c.result === 'PASS' || c.result === 'PASS (KNOWN DEFECTS)'
+              ? 'PASS'
+              : 'FAIL';
+          const responsive = c.responsive
+            ? final === 'PASS'
+              ? 'passed'
+              : 'failed'
+            : 'not run';
+          lines.push('');
+          lines.push('| Field | Value |');
+          lines.push('| --- | --- |');
+          lines.push(`| Cycle | Regression |`);
+          lines.push(`| Environment | ${c.environment || String(process.env.FALLBACK_ENV || 'qa').toUpperCase()} |`);
+          lines.push(`| Browser | ${c.browser || 'Chromium'} |`);
+          lines.push(`| Projects | ${(c.projects || []).join(', ') || 'desktop-1440'} |`);
+          lines.push(`| Started | ${c.startedAt || 'n/a'} |`);
+          lines.push(`| Duration | ${duration} |`);
+          lines.push(`| Total | ${counts.total ?? 'n/a'} |`);
+          lines.push(`| Passed | ${counts.passed ?? 'n/a'} |`);
+          lines.push(`| Failed | ${counts.failed ?? 'n/a'} |`);
+          lines.push(`| Skipped | ${counts.skipped ?? 'n/a'} |`);
+          lines.push(`| Known defects | ${counts.knownDefects ?? 'n/a'} |`);
+          lines.push(`| Unexpected failures | ${counts.unexpectedFailures ?? 'n/a'} |`);
+          lines.push(`| Responsive | ${responsive} |`);
+          lines.push(`| Final result | **${final}** |`);
+          if (c.result === 'PASS (KNOWN DEFECTS)') {
+            lines.push('');
+            lines.push('_Cycle passed with known defects only (e.g. CACHE-005). Unexpected failures still fail the workflow._');
+          }
+          fs.appendFileSync(out, lines.join('\n') + '\n');
+          EOF
+
+      - name: Upload regression reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          # Distinct name so responsive runs do not collide with desktop artifacts.
+          name: search-ui-regression-reports${{ github.event.inputs.run_responsive == 'true' && '-responsive' || '' }}
+          retention-days: 30
+          path: |
+            search-ui-automation/reports/search-ui-regression-report.json
+            search-ui-automation/reports/search-ui-regression-summary.txt
+            search-ui-automation/reports/html/search-ui-regression-dashboard.html
+            search-ui-automation/reports/search-ui-summary.json
+            search-ui-automation/reports/search-ui-summary.md
+            search-ui-automation/reports/search-ui-playwright-results.json
+          if-no-files-found: warn
+
+      - name: Upload Playwright failure artifacts
+        if: ${{ !cancelled() && failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: search-ui-regression-test-results${{ github.event.inputs.run_responsive == 'true' && '-responsive' || '' }}
+          retention-days: 30
+          path: search-ui-automation/test-results/
+          if-no-files-found: ignore

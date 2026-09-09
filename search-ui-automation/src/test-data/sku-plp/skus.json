@@ -1,0 +1,18 @@
+{
+  "description": "SKU search → product-page cache validation. Unique-match catalog SKUs (plp=true). Search order is expanded at runtime into A→B, B→C, C→A, A→B→A sequences plus remaining SKUs.",
+  "source": "catalog_sku_plp_results.json",
+  "skus": [
+    "AA201007",
+    "AA201008",
+    "AA201010",
+    "AA201005",
+    "AA201015",
+    "AA201004",
+    "AA201006",
+    "AA203251",
+    "AA203201",
+    "AA203152",
+    "AA203151",
+    "AA203261"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "label": "Analytics smoke — 15 representative queries from the Non-SKU top-50 dataset",
+  "notes": "IDs only. Query text and metadata always come from queries-50.json. Do not invent queries.",
+  "ids": [
+    "AN-Q001",
+    "AN-Q002",
+    "AN-Q003",
+    "AN-Q007",
+    "AN-Q008",
+    "AN-Q009",
+    "AN-Q016",
+    "AN-Q019",
+    "AN-Q024",
+    "AN-Q029",
+    "AN-Q031",
+    "AN-Q039",
+    "AN-Q043",
+    "AN-Q047",
+    "AN-Q050"
+  ],
+  "coverage": {
+    "AN-Q001": "multi-word product",
+    "AN-Q002": "long brand",
+    "AN-Q003": "short product",
+    "AN-Q007": "brand + product",
+    "AN-Q008": "brand",
+    "AN-Q009": "product",
+    "AN-Q016": "brand / sparse suggestions candidate",
+    "AN-Q019": "measurement + special characters",
+    "AN-Q024": "long brand",
+    "AN-Q029": "brand",
+    "AN-Q031": "multi-word product",
+    "AN-Q039": "case variant",
+    "AN-Q043": "multi-word product phrase",
+    "AN-Q047": "short brand / typo-like",
+    "AN-Q050": "spaced brand variant"
+  }
+}

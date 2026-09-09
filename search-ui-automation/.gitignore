@@ -1,0 +1,38 @@
+node_modules/
+.env
+.env.local
+.auth/
+
+# Playwright artifacts
+test-results/
+playwright-report/
+reports/html/
+reports/playwright-results.json
+reports/playwright-results.partial.json
+reports/search-ui-playwright-results.json
+reports/search-ui-summary.json
+reports/search-ui-summary.md
+reports/analytics-*.json
+reports/analytics-failures.md
+reports/sku-plp/
+reports/sku-plp-inspect.json
+reports/sku-plp-inspect-deep.json
+src/test-data/sku-plp/skus-all.json
+reports/*.log
+reports/traces/
+blob-report/
+playwright/.cache/
+
+# OS / IDE
+.DS_Store
+*.log
+.idea/
+.vscode/
+
+# Ephemeral analytics / suite run artifacts
+reports/analytics-batch/
+reports/analytics-batch-archives/
+reports/failure-screenshots/
+reports/*-inspect*.json
+reports/filters-facets-*.json
+reports/*.done
