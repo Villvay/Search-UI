@@ -64,13 +64,25 @@ jobs:
         id: env
         env:
           INPUT_ENV: ${{ github.event.inputs.environment || 'qa' }}
+          BASE_URL_QA: ${{ vars.BASE_URL_QA }}
+          BASE_URL_PROD: ${{ vars.BASE_URL_PROD }}
         run: |
           TARGET="${INPUT_ENV:-qa}"
           echo "target=$TARGET" >> "$GITHUB_OUTPUT"
           if [ "$TARGET" = "production" ]; then
-            echo "base_url=${{ vars.BASE_URL_PROD }}" >> "$GITHUB_OUTPUT"
+            BASE_URL_VALUE="${BASE_URL_PROD}"
           else
-            echo "base_url=${{ vars.BASE_URL_QA }}" >> "$GITHUB_OUTPUT"
+            BASE_URL_VALUE="${BASE_URL_QA}"
+          fi
+          # Only export BASE_URL when a non-empty repo variable is set.
+          # Otherwise Playwright uses environments.ts defaults (QA / Production).
+          if [ -n "${BASE_URL_VALUE}" ]; then
+            echo "base_url=${BASE_URL_VALUE}" >> "$GITHUB_OUTPUT"
+            echo "has_base_url=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "base_url=" >> "$GITHUB_OUTPUT"
+            echo "has_base_url=false" >> "$GITHUB_OUTPUT"
+            echo "Using default base URL from environments.ts for ENV=${TARGET}"
           fi
           if [ "${{ github.event.inputs.run_responsive }}" = "true" ]; then
             echo "artifact_name=search-ui-smoke-reports-responsive" >> "$GITHUB_OUTPUT"
@@ -82,7 +94,6 @@ jobs:
         id: smoke_run
         env:
           ENV: ${{ steps.env.outputs.target }}
-          BASE_URL: ${{ steps.env.outputs.base_url }}
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
           UI_MODULE_WORKERS: '3'
           UI_PLAYWRIGHT_WORKERS: '2'
@@ -91,6 +102,14 @@ jobs:
           CI: 'true'
           SMOKE_ARTIFACT_NAME: ${{ steps.env.outputs.artifact_name }}
         run: |
+          # Pass BASE_URL only when a repo variable override exists (avoid empty string).
+          if [ "${{ steps.env.outputs.has_base_url }}" = "true" ]; then
+            export BASE_URL="${{ steps.env.outputs.base_url }}"
+          else
+            unset BASE_URL || true
+          fi
+          echo "ENV=${ENV}"
+          echo "BASE_URL=${BASE_URL:-<default from environments.ts>}"
           if [ "${{ github.event.inputs.run_responsive }}" = "true" ]; then
             npm run test:smoke:responsive
           else

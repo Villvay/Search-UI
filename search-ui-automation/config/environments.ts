@@ -56,7 +56,9 @@ function resolveEnvironmentName(raw: string | undefined): EnvironmentName {
 export function getEnvironmentConfig(): EnvironmentConfig {
   const name = resolveEnvironmentName(process.env.ENV);
   const defaults = ENVIRONMENT_DEFAULTS[name];
-  const baseURL = (process.env.BASE_URL ?? defaults.baseURL).replace(/\/$/, '');
+  // Empty string from CI vars must not override defaults (?? only skips null/undefined).
+  const override = process.env.BASE_URL?.trim();
+  const baseURL = (override || defaults.baseURL).replace(/\/$/, '');
 
   return {
     ...defaults,

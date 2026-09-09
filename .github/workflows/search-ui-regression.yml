@@ -64,7 +64,6 @@ jobs:
         id: regression_run
         env:
           ENV: ${{ github.event.inputs.environment || 'qa' }}
-          BASE_URL: ${{ vars.BASE_URL }}
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
           # Existing cycle defaults: module workers 2, playwright workers 2, retries 1
           UI_MODULE_WORKERS: '2'
@@ -73,6 +72,14 @@ jobs:
           PLAYWRIGHT_HTML_OPEN: never
           CI: 'true'
         run: |
+          # Optional override only — empty vars.BASE_URL must not blank the default host.
+          if [ -n "${{ vars.BASE_URL }}" ]; then
+            export BASE_URL="${{ vars.BASE_URL }}"
+          else
+            unset BASE_URL || true
+          fi
+          echo "ENV=${ENV}"
+          echo "BASE_URL=${BASE_URL:-<default from environments.ts>}"
           if [ "${{ github.event.inputs.run_responsive }}" = "true" ]; then
             npm run test:regression:responsive
           else
