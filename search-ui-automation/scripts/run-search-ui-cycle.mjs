@@ -302,9 +302,39 @@ function annotateSummaryForCycle(summary, cycle, meta) {
       },
       result: cycleResult,
       exitCode: unexpectedFailed > 0 || duplicates.length > 0 ? 1 : 0,
+      /** Optional CI metadata — never required for local runs. */
+      ci: meta.ci || null,
     },
     byModuleCycle,
     tests,
+  };
+}
+
+function collectCiMetadata() {
+  const sha = process.env.GITHUB_SHA || process.env.CI_COMMIT_SHA || '';
+  const runId = process.env.GITHUB_RUN_ID || '';
+  const runNumber = process.env.GITHUB_RUN_NUMBER || '';
+  const repository = process.env.GITHUB_REPOSITORY || '';
+  const serverUrl = (process.env.GITHUB_SERVER_URL || 'https://github.com').replace(
+    /\/$/,
+    '',
+  );
+  const branch =
+    process.env.GITHUB_REF_NAME ||
+    process.env.GITHUB_HEAD_REF ||
+    process.env.CI_COMMIT_REF_NAME ||
+    '';
+  if (!sha && !runId && !branch && !repository) return null;
+  return {
+    branch: branch || null,
+    sha: sha || null,
+    shortSha: sha ? sha.slice(0, 7) : null,
+    runId: runId || null,
+    runNumber: runNumber || null,
+    repository: repository || null,
+    serverUrl,
+    runUrl:
+      repository && runId ? `${serverUrl}/${repository}/actions/runs/${runId}` : null,
   };
 }
 
@@ -552,6 +582,7 @@ const annotated = annotateSummaryForCycle(summary, cycle, {
   moduleWorkers,
   playwrightWorkers,
   retries: Number.isFinite(retries) ? retries : 0,
+  ci: collectCiMetadata(),
   moduleResults: moduleResults.map((r) => ({
     id: r.module.id,
     label: r.module.label,

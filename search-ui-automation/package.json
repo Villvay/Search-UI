@@ -17,6 +17,8 @@
     "test:smoke:responsive": "node scripts/run-search-ui-cycle.mjs --cycle=smoke --responsive",
     "test:regression": "node scripts/run-search-ui-cycle.mjs --cycle=regression",
     "test:regression:responsive": "node scripts/run-search-ui-cycle.mjs --cycle=regression --responsive",
+    "notify:smoke:teams": "node scripts/notify-search-ui-teams.mjs --report=reports/search-ui-smoke-report.json",
+    "notify:smoke:teams:dry-run": "node scripts/notify-search-ui-teams.mjs --report=reports/search-ui-smoke-report.json --dry-run",
     "test:desktop": "playwright test --project=desktop-1440 --project=desktop-1280",
     "test:desktop-1440:browsers": "playwright test --project=desktop-1440 --project=desktop-1440-firefox",
     "test:analytics:desktop-1440:browsers": "node scripts/run-analytics.mjs --project=desktop-1440 --project=desktop-1440-firefox",
