@@ -216,7 +216,7 @@ jobs:
           lines.push(`| Final result | **${final}** |`);
           lines.push('');
           lines.push('### Links');
-          lines.push(`- Dashboard artifact: \`${artifact}\` → \`search-ui-smoke-dashboard.html\``);
+          lines.push(`- Detailed HTML dashboard: download artifact \`${artifact}\` → \`search-ui-smoke-dashboard.html\``);
           if (runUrl) {
             lines.push(`- [View GitHub Actions Run](${runUrl})`);
             lines.push(`- [Open run artifacts](${runUrl}#artifacts)`);
@@ -234,7 +234,6 @@ jobs:
         env:
           TEAMS_SEARCH_UI_WEBHOOK: ${{ secrets.TEAMS_SEARCH_UI_WEBHOOK }}
           SMOKE_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          SMOKE_DASHBOARD_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts
           SMOKE_ARTIFACT_NAME: ${{ steps.env.outputs.artifact_name }}
         run: |
           if [ -z "${TEAMS_SEARCH_UI_WEBHOOK}" ]; then

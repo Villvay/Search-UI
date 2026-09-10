@@ -21,6 +21,15 @@ const automationUserAgent = getAutomationUserAgent();
 const desktop1440 = getViewportById('desktop-1440');
 const includeSafari = isSafariIncluded();
 
+/**
+ * Device presets (Desktop Chrome, etc.) include their own userAgent and would
+ * override the global automation UA. Always re-apply after spreading devices.
+ */
+const automationContext = {
+  userAgent: automationUserAgent,
+  extraHTTPHeaders: bypassHeaders,
+};
+
 /** Other viewports stay Chromium-only (original project names preserved). */
 const otherViewportProjects = VIEWPORTS.filter((v) => v.id !== 'desktop-1440').map(
   (viewport) => ({
@@ -29,6 +38,7 @@ const otherViewportProjects = VIEWPORTS.filter((v) => v.id !== 'desktop-1440').m
       ...devices['Desktop Chrome'],
       browserName: 'chromium' as const,
       viewport: { width: viewport.width, height: viewport.height },
+      ...automationContext,
     },
   }),
 );
@@ -43,6 +53,7 @@ const desktop1440Chromium = {
     ...devices['Desktop Chrome'],
     browserName: 'chromium' as const,
     viewport: { width: desktop1440.width, height: desktop1440.height },
+    ...automationContext,
   },
 };
 
@@ -55,6 +66,7 @@ const desktop1440ExtraBrowserProjects = DESKTOP_1440_EXTRA_BROWSERS.filter(
     ...devices[browser.deviceKey],
     browserName: browser.browserName,
     viewport: { width: desktop1440.width, height: desktop1440.height },
+    ...automationContext,
   },
 }));
 

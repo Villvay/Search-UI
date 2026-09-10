@@ -316,7 +316,17 @@ If these variables are unset, smoke uses the defaults in `config/environments.ts
 - `reports/html/search-ui-smoke-dashboard.html` (detailed cycle / module / test dashboard)
 - `test-results/` on failure
 
-Teams messages use a **Workflow Adaptive Card** with clickable actions for the Actions run and the artifact section (download `search-ui-smoke-dashboard.html`). Local dry-run:
+Teams messages use a **Workflow Adaptive Card** with:
+
+- overall result + counts + duration + environment/browser/viewport
+- concise **Coverage** bullets grouped by executed smoke modules (from report test IDs)
+- known defects / unexpected failures called out on the relevant module
+- **Detailed report:** download `search-ui-smoke-dashboard.html` from workflow artifacts
+- **View GitHub Actions Run** (+ artifacts tab)
+
+No GitHub Pages hosting is used.
+
+Local dry-run:
 
 ```bash
 npm run notify:smoke:teams:dry-run

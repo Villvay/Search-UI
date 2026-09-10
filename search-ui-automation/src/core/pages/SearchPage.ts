@@ -45,8 +45,9 @@ export class SearchPage extends BasePage {
         .catch(() => false);
 
       if (blockedEarly) {
+        const ua = await this.page.evaluate(() => navigator.userAgent).catch(() => 'unknown');
         lastError = new Error(
-          `Vercel Security Checkpoint blocked page load (attempt ${attempt}/${maxAttempts}). Ensure User-Agent jmter-elastic-search is applied, or set VERCEL_AUTOMATION_BYPASS_SECRET.`,
+          `Vercel Security Checkpoint blocked page load (attempt ${attempt}/${maxAttempts}). navigator.userAgent=${ua}. Expected jmter-elastic-search, or set VERCEL_AUTOMATION_BYPASS_SECRET.`,
         );
         continue;
       }
@@ -60,8 +61,9 @@ export class SearchPage extends BasePage {
           .isVisible()
           .catch(() => false);
         if (blockedLate) {
+          const ua = await this.page.evaluate(() => navigator.userAgent).catch(() => 'unknown');
           lastError = new Error(
-            `Vercel Security Checkpoint blocked page load (attempt ${attempt}/${maxAttempts}). Ensure User-Agent jmter-elastic-search is applied, or set VERCEL_AUTOMATION_BYPASS_SECRET.`,
+            `Vercel Security Checkpoint blocked page load (attempt ${attempt}/${maxAttempts}). navigator.userAgent=${ua}. Expected jmter-elastic-search, or set VERCEL_AUTOMATION_BYPASS_SECRET.`,
           );
         }
         if (attempt < maxAttempts) {
@@ -105,8 +107,9 @@ export class SearchPage extends BasePage {
         .catch(() => false);
 
       if (blockedEarly) {
+        const ua = await this.page.evaluate(() => navigator.userAgent).catch(() => 'unknown');
         lastError = new Error(
-          `Vercel Security Checkpoint blocked SERP load (attempt ${attempt}/${maxAttempts}). Ensure User-Agent jmter-elastic-search is applied, or set VERCEL_AUTOMATION_BYPASS_SECRET.`,
+          `Vercel Security Checkpoint blocked SERP load (attempt ${attempt}/${maxAttempts}). navigator.userAgent=${ua}. Expected jmter-elastic-search, or set VERCEL_AUTOMATION_BYPASS_SECRET.`,
         );
         continue;
       }
@@ -126,8 +129,9 @@ export class SearchPage extends BasePage {
           .isVisible()
           .catch(() => false);
         if (blockedLate) {
+          const ua = await this.page.evaluate(() => navigator.userAgent).catch(() => 'unknown');
           lastError = new Error(
-            `Vercel Security Checkpoint blocked SERP load (attempt ${attempt}/${maxAttempts}). Ensure User-Agent jmter-elastic-search is applied, or set VERCEL_AUTOMATION_BYPASS_SECRET.`,
+            `Vercel Security Checkpoint blocked SERP load (attempt ${attempt}/${maxAttempts}). navigator.userAgent=${ua}. Expected jmter-elastic-search, or set VERCEL_AUTOMATION_BYPASS_SECRET.`,
           );
         }
         if (attempt < maxAttempts) {
