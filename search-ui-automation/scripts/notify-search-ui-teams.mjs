@@ -23,11 +23,13 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
  * Human-readable smoke coverage keyed by report module + executed test IDs.
  * Only IDs that appear in the report contribute; modules with zero tests are omitted.
  */
+/** Modules omitted from Teams coverage summary even if present in the report. */
+const COVERAGE_OMIT_MODULES = new Set(['SORTING']);
+
 const MODULE_COVERAGE = [
   {
     reportModule: 'ON-TYPE',
     label: 'On-Type',
-    emoji: '🔎',
     pointsFor(ids) {
       const points = [];
       if (ids.has('ON-TYPE-001')) {
@@ -44,7 +46,6 @@ const MODULE_COVERAGE = [
   {
     reportModule: 'SUGGESTIONS',
     label: 'Suggestions',
-    emoji: '💡',
     pointsFor(ids) {
       const points = [];
       if (ids.has('SUG-001')) {
@@ -61,7 +62,6 @@ const MODULE_COVERAGE = [
   {
     reportModule: 'ON-ENTER',
     label: 'On-Enter',
-    emoji: '⏎',
     pointsFor(ids) {
       const points = [];
       if (ids.has('ENTER-001')) {
@@ -78,7 +78,6 @@ const MODULE_COVERAGE = [
   {
     reportModule: 'TRENDING NOW',
     label: 'Trending Now',
-    emoji: '🔥',
     pointsFor(ids) {
       const points = [];
       if (ids.has('TREND-001') || ids.has('TREND-002')) {
@@ -95,7 +94,6 @@ const MODULE_COVERAGE = [
   {
     reportModule: 'RECENT SEARCHES',
     label: 'Your Recent Searches',
-    emoji: '🕘',
     pointsFor(ids) {
       const points = [];
       if (ids.has('RECENT-001') || ids.has('RECENT-002')) {
@@ -115,7 +113,6 @@ const MODULE_COVERAGE = [
   {
     reportModule: 'FILTERS & FACETS',
     label: 'Filters & Facets',
-    emoji: '🔧',
     pointsFor(ids) {
       const points = [];
       if (ids.has('FILTER-001') || ids.has('FILTER-002')) {
@@ -135,7 +132,6 @@ const MODULE_COVERAGE = [
   {
     reportModule: 'RUNTIME ERRORS',
     label: 'Runtime Errors',
-    emoji: '⚠️',
     pointsFor(ids) {
       const points = [];
       if (ids.has('RUNTIME-001') || ids.has('RUNTIME-002') || ids.has('RUNTIME-003')) {
@@ -149,7 +145,6 @@ const MODULE_COVERAGE = [
   {
     reportModule: 'CACHE & STATE',
     label: 'Cache & Search State',
-    emoji: '🧠',
     pointsFor(ids) {
       const points = [];
       if (
@@ -169,7 +164,6 @@ const MODULE_COVERAGE = [
   {
     reportModule: 'SEARCH INPUT ROBUSTNESS',
     label: 'Search Input Robustness',
-    emoji: '🛡️',
     pointsFor(ids) {
       const points = [];
       if (ids.has('INPUT-001')) {
@@ -184,21 +178,8 @@ const MODULE_COVERAGE = [
     },
   },
   {
-    reportModule: 'SORTING',
-    label: 'Sorting',
-    emoji: '↕️',
-    pointsFor(ids) {
-      const points = [];
-      if (ids.has('SORT-001')) {
-        points.push('Sorting control visibility/contract on SERP is validated');
-      }
-      return points;
-    },
-  },
-  {
     reportModule: 'RELATED SEARCHES',
     label: 'Related Searches',
-    emoji: '🔗',
     pointsFor(ids) {
       // Related Searches is excluded from current smoke; only show if tests ran.
       if (!ids.size) return [];
@@ -243,12 +224,12 @@ function fmtDuration(ms) {
 function cycleOutcome(cycle) {
   const result = cycle?.result || '';
   if (result === 'FAILED' || result === 'FAIL') {
-    return { label: 'FAIL', emoji: '🔴', color: 'Attention' };
+    return { label: 'FAIL', color: 'Attention' };
   }
   if (result === 'PASS (KNOWN DEFECTS)') {
-    return { label: 'PASS — Known Defects', emoji: '🟢', color: 'Warning' };
+    return { label: 'PASS — Known Defects', color: 'Warning' };
   }
-  return { label: 'PASS', emoji: '🟢', color: 'Good' };
+  return { label: 'PASS', color: 'Good' };
 }
 
 function shortDefectReason(t) {
@@ -285,6 +266,7 @@ function buildCoverageSections(report) {
   const seen = new Set();
 
   for (const meta of MODULE_COVERAGE) {
+    if (COVERAGE_OMIT_MODULES.has(meta.reportModule)) continue;
     const bucket = byModule.get(meta.reportModule);
     if (!bucket || bucket.tests.length === 0) continue;
     seen.add(meta.reportModule);
@@ -298,35 +280,37 @@ function buildCoverageSections(report) {
 
     for (const t of bucket.known) {
       coveragePoints.push(
-        `⚠️ Known defect: ${t.testId || 'unknown'} — ${shortDefectReason(t)}`,
+        `Known defect: ${t.testId || 'unknown'} — ${shortDefectReason(t)}`,
       );
     }
     for (const t of bucket.failed.slice(0, 3)) {
-      coveragePoints.push(`🔴 Unexpected failure: ${t.testId || t.title || 'unknown'}`);
+      coveragePoints.push(
+        `Unexpected failure: ${t.testId || t.title || 'unknown'}`,
+      );
     }
 
     sections.push({
       module: meta.reportModule,
       label: meta.label,
-      emoji: meta.emoji,
       points: coveragePoints,
     });
   }
 
   // Any executed module not in the catalog (should be rare).
   for (const [mod, bucket] of byModule.entries()) {
-    if (seen.has(mod) || bucket.tests.length === 0) continue;
+    if (seen.has(mod) || COVERAGE_OMIT_MODULES.has(mod) || bucket.tests.length === 0) {
+      continue;
+    }
     const points = bucket.tests.slice(0, 3).map((t) => readableTitle(t));
     for (const t of bucket.known) {
-      points.push(`⚠️ Known defect: ${t.testId || 'unknown'} — ${shortDefectReason(t)}`);
+      points.push(`Known defect: ${t.testId || 'unknown'} — ${shortDefectReason(t)}`);
     }
     for (const t of bucket.failed.slice(0, 3)) {
-      points.push(`🔴 Unexpected failure: ${t.testId || t.title || 'unknown'}`);
+      points.push(`Unexpected failure: ${t.testId || t.title || 'unknown'}`);
     }
     sections.push({
       module: mod,
       label: mod,
-      emoji: '•',
       points,
     });
   }
@@ -359,9 +343,9 @@ function buildTextMessage(report, opts) {
   const unexpected = counts.unexpectedFailures ?? failed;
 
   const lines = [];
-  lines.push(`🔍 Search UI Daily Smoke — ${env}`);
+  lines.push(`Search UI Daily Smoke — ${env}`);
   lines.push('');
-  lines.push(`${outcome.emoji} ${outcome.label}`);
+  lines.push(outcome.label);
   lines.push('');
   lines.push(`${passed}/${total} passed`);
   lines.push(`${failed} failed`);
@@ -378,21 +362,21 @@ function buildTextMessage(report, opts) {
     lines.push('');
     lines.push('Coverage:');
     for (const section of coverage) {
-      lines.push(`${section.emoji} ${section.label}`);
+      lines.push(section.label);
       for (const point of section.points) {
-        lines.push(`• ${point}`);
+        lines.push(`- ${point}`);
       }
       lines.push('');
     }
   }
 
   lines.push(
-    `📊 Detailed report: Download \`search-ui-smoke-dashboard.html\` from the workflow artifacts (\`${opts.artifactName}\`).`,
+    `Detailed report: Download \`search-ui-smoke-dashboard.html\` from the workflow artifacts (\`${opts.artifactName}\`).`,
   );
   if (runUrl) {
-    lines.push(`🔗 View GitHub Actions Run: ${runUrl}`);
+    lines.push(`View GitHub Actions Run: ${runUrl}`);
   } else {
-    lines.push('🔗 View GitHub Actions Run: (unavailable outside CI)');
+    lines.push('View GitHub Actions Run: (unavailable outside CI)');
   }
 
   return lines.join('\n').trimEnd();
@@ -433,14 +417,14 @@ function buildAdaptiveCard(report, opts) {
       type: 'TextBlock',
       size: 'Large',
       weight: 'Bolder',
-      text: `🔍 Search UI Daily Smoke — ${env}`,
+      text: `Search UI Daily Smoke — ${env}`,
       wrap: true,
     },
     {
       type: 'TextBlock',
       size: 'Medium',
       weight: 'Bolder',
-      text: `${outcome.emoji} ${outcome.label}`,
+      text: outcome.label,
       color: outcome.color,
       wrap: true,
       spacing: 'Small',
@@ -465,13 +449,13 @@ function buildAdaptiveCard(report, opts) {
       body.push({
         type: 'TextBlock',
         weight: 'Bolder',
-        text: `${section.emoji} ${section.label}`,
+        text: section.label,
         spacing: 'Small',
         wrap: true,
       });
       body.push({
         type: 'TextBlock',
-        text: section.points.map((p) => `• ${p}`).join('\n'),
+        text: section.points.map((p) => `- ${p}`).join('\n'),
         wrap: true,
         spacing: 'None',
       });
@@ -480,7 +464,7 @@ function buildAdaptiveCard(report, opts) {
 
   body.push({
     type: 'TextBlock',
-    text: `📊 Detailed report: Download \`search-ui-smoke-dashboard.html\` from the workflow artifacts (\`${opts.artifactName}\`).`,
+    text: `Detailed report: Download \`search-ui-smoke-dashboard.html\` from the workflow artifacts (\`${opts.artifactName}\`).`,
     wrap: true,
     spacing: 'Medium',
   });
@@ -489,12 +473,12 @@ function buildAdaptiveCard(report, opts) {
   if (runUrl) {
     actions.push({
       type: 'Action.OpenUrl',
-      title: '🔗 View GitHub Actions Run',
+      title: 'View GitHub Actions Run',
       url: runUrl,
     });
     actions.push({
       type: 'Action.OpenUrl',
-      title: '📦 Open run artifacts',
+      title: 'Open run artifacts',
       url: `${runUrl.replace(/#.*$/, '')}#artifacts`,
     });
   }
