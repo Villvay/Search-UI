@@ -4,6 +4,9 @@
  * Uses Adaptive Card payload for Teams Workflow webhooks
  * ("Post to a channel when a webhook request is received").
  *
+ * Coverage bullets are derived only from tests present in the cycle report
+ * (no invented modules or assertions).
+ *
  *   node scripts/notify-search-ui-teams.mjs --report=reports/search-ui-smoke-report.json --dry-run
  *   node scripts/notify-search-ui-teams.mjs --report=reports/search-ui-smoke-report.json
  *
@@ -16,22 +19,213 @@ import { fileURLToPath } from 'url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
+/**
+ * Human-readable smoke coverage keyed by report module + executed test IDs.
+ * Only IDs that appear in the report contribute; modules with zero tests are omitted.
+ */
+const MODULE_COVERAGE = [
+  {
+    reportModule: 'ON-TYPE',
+    label: 'On-Type',
+    emoji: '🔎',
+    pointsFor(ids) {
+      const points = [];
+      if (ids.has('ON-TYPE-001')) {
+        points.push('Search responds once the minimum query length is typed');
+      }
+      if (ids.has('ON-TYPE-003')) {
+        points.push('Clearing the query resets on-type search state');
+      }
+      return consolidate(points, [
+        'Search suggestions trigger correctly while typing and clear cleanly',
+      ]);
+    },
+  },
+  {
+    reportModule: 'SUGGESTIONS',
+    label: 'Suggestions',
+    emoji: '💡',
+    pointsFor(ids) {
+      const points = [];
+      if (ids.has('SUG-001')) {
+        points.push('Empty search focus shows the trending dropdown');
+      }
+      if (ids.has('SUG-002')) {
+        points.push('Valid queries display suggestion results');
+      }
+      return consolidate(points, [
+        'Suggestion dropdown and query suggestions are validated',
+      ]);
+    },
+  },
+  {
+    reportModule: 'ON-ENTER',
+    label: 'On-Enter',
+    emoji: '⏎',
+    pointsFor(ids) {
+      const points = [];
+      if (ids.has('ENTER-001')) {
+        points.push('Enter submits a valid search');
+      }
+      if (ids.has('ENTER-002')) {
+        points.push('Search URL retains the submitted query');
+      }
+      return consolidate(points, [
+        'Enter submission navigates to search results with the correct query',
+      ]);
+    },
+  },
+  {
+    reportModule: 'TRENDING NOW',
+    label: 'Trending Now',
+    emoji: '🔥',
+    pointsFor(ids) {
+      const points = [];
+      if (ids.has('TREND-001') || ids.has('TREND-002')) {
+        points.push('Trending Now queries are displayed on empty focus');
+      }
+      if (ids.has('TREND-004')) {
+        points.push('Clicking a trending query opens the correct search results');
+      }
+      return consolidate(points, [
+        'Trending queries are displayed and navigate to the correct SERP',
+      ]);
+    },
+  },
+  {
+    reportModule: 'RECENT SEARCHES',
+    label: 'Your Recent Searches',
+    emoji: '🕘',
+    pointsFor(ids) {
+      const points = [];
+      if (ids.has('RECENT-001') || ids.has('RECENT-002')) {
+        points.push('Recent search history is displayed');
+      }
+      if (ids.has('RECENT-005')) {
+        points.push('Clicking a recent search opens the correct SERP');
+      }
+      if (ids.has('RECENT-007')) {
+        points.push('Individual recent searches can be removed');
+      }
+      return consolidate(points, [
+        'Recent history is displayed, selectable, and removable',
+      ]);
+    },
+  },
+  {
+    reportModule: 'FILTERS & FACETS',
+    label: 'Filters & Facets',
+    emoji: '🔧',
+    pointsFor(ids) {
+      const points = [];
+      if (ids.has('FILTER-001') || ids.has('FILTER-002')) {
+        points.push('Filters panel and facet groups are displayed on SERP');
+      }
+      if (ids.has('FILTER-004')) {
+        points.push('Selecting a filter shows the selected state');
+      }
+      if (ids.has('FILTER-005')) {
+        points.push('Applying a filter updates search results');
+      }
+      return consolidate(points, [
+        'Filters apply correctly and update search state/results',
+      ]);
+    },
+  },
+  {
+    reportModule: 'RUNTIME ERRORS',
+    label: 'Runtime Errors',
+    emoji: '⚠️',
+    pointsFor(ids) {
+      const points = [];
+      if (ids.has('RUNTIME-001') || ids.has('RUNTIME-002') || ids.has('RUNTIME-003')) {
+        points.push(
+          'Unexpected console, page, and interaction runtime errors are monitored',
+        );
+      }
+      return points;
+    },
+  },
+  {
+    reportModule: 'CACHE & STATE',
+    label: 'Cache & Search State',
+    emoji: '🧠',
+    pointsFor(ids) {
+      const points = [];
+      if (
+        ids.has('CACHE-001') ||
+        ids.has('CACHE-002') ||
+        ids.has('CACHE-003') ||
+        ids.has('CACHE-006') ||
+        ids.has('CACHE-008')
+      ) {
+        points.push(
+          'Search state stays consistent across query changes, refresh, URL sync, and clear',
+        );
+      }
+      return points;
+    },
+  },
+  {
+    reportModule: 'SEARCH INPUT ROBUSTNESS',
+    label: 'Search Input Robustness',
+    emoji: '🛡️',
+    pointsFor(ids) {
+      const points = [];
+      if (ids.has('INPUT-001')) {
+        points.push('Normal query baseline is handled safely');
+      }
+      if (ids.has('INPUT-007') || ids.has('INPUT-008')) {
+        points.push('HTML-like and JavaScript-like input is treated as plain text');
+      }
+      return consolidate(points, [
+        'Normal and special/HTML/JS-like inputs are handled safely',
+      ]);
+    },
+  },
+  {
+    reportModule: 'SORTING',
+    label: 'Sorting',
+    emoji: '↕️',
+    pointsFor(ids) {
+      const points = [];
+      if (ids.has('SORT-001')) {
+        points.push('Sorting control visibility/contract on SERP is validated');
+      }
+      return points;
+    },
+  },
+  {
+    reportModule: 'RELATED SEARCHES',
+    label: 'Related Searches',
+    emoji: '🔗',
+    pointsFor(ids) {
+      // Related Searches is excluded from current smoke; only show if tests ran.
+      if (!ids.size) return [];
+      return ['Related Searches smoke coverage executed'];
+    },
+  },
+];
+
+function consolidate(detailPoints, rolledUp) {
+  if (detailPoints.length <= 3) return detailPoints;
+  return rolledUp;
+}
+
 function parseArgs(argv) {
   const out = {
     reportRel: 'reports/search-ui-smoke-report.json',
     dryRun: false,
     runUrl: process.env.SMOKE_RUN_URL || '',
-    dashboardUrl: process.env.SMOKE_DASHBOARD_URL || '',
     artifactName: process.env.SMOKE_ARTIFACT_NAME || 'search-ui-smoke-reports',
   };
   for (const arg of argv) {
     if (arg.startsWith('--report=')) out.reportRel = arg.slice('--report='.length);
     else if (arg === '--dry-run') out.dryRun = true;
     else if (arg.startsWith('--run-url=')) out.runUrl = arg.slice('--run-url='.length);
-    else if (arg.startsWith('--dashboard-url='))
-      out.dashboardUrl = arg.slice('--dashboard-url='.length);
     else if (arg.startsWith('--artifact-name='))
       out.artifactName = arg.slice('--artifact-name='.length);
+    // --dashboard-url retained for backward compatibility but ignored (no Pages).
   }
   return out;
 }
@@ -49,42 +243,105 @@ function fmtDuration(ms) {
 function cycleOutcome(cycle) {
   const result = cycle?.result || '';
   if (result === 'FAILED' || result === 'FAIL') {
-    return {
-      label: 'FAIL',
-      emoji: '🔴',
-      color: 'Attention',
-    };
+    return { label: 'FAIL', emoji: '🔴', color: 'Attention' };
   }
   if (result === 'PASS (KNOWN DEFECTS)') {
-    return {
-      label: 'PASS — Known Defects',
-      emoji: '🟢',
-      color: 'Warning',
-    };
+    return { label: 'PASS — Known Defects', emoji: '🟢', color: 'Warning' };
   }
-  return {
-    label: 'PASS',
-    emoji: '🟢',
-    color: 'Good',
-  };
+  return { label: 'PASS', emoji: '🟢', color: 'Good' };
 }
 
-function resolveLinks(opts) {
-  const runUrl = (opts.runUrl || '').trim();
-  let dashboardUrl = (opts.dashboardUrl || '').trim();
+function shortDefectReason(t) {
+  return (t.knownDefectReason || t.error || t.errorMessage || 'known defect')
+    .split('\n')[0]
+    .slice(0, 140);
+}
 
-  // Artifact / run tabs are not viewable HTML — never treat them as the dashboard.
-  const runBase = runUrl.replace(/#.*$/, '');
-  const dashBase = dashboardUrl.replace(/#.*$/, '');
-  if (
-    !dashboardUrl ||
-    dashboardUrl.includes('#artifacts') ||
-    (runBase && dashBase === runBase)
-  ) {
-    dashboardUrl = '';
+/**
+ * Build coverage sections only for modules that actually executed in this report.
+ */
+function buildCoverageSections(report) {
+  const tests = report.tests || [];
+  const byModule = new Map();
+
+  for (const t of tests) {
+    const mod = t.module || 'OTHER';
+    if (!byModule.has(mod)) {
+      byModule.set(mod, {
+        tests: [],
+        ids: new Set(),
+        known: [],
+        failed: [],
+      });
+    }
+    const bucket = byModule.get(mod);
+    bucket.tests.push(t);
+    if (t.testId) bucket.ids.add(String(t.testId).toUpperCase());
+    if (t.cycleStatus === 'KNOWN DEFECT' || t.knownDefect) bucket.known.push(t);
+    else if (t.status === 'failed') bucket.failed.push(t);
   }
 
-  return { runUrl, dashboardUrl };
+  const sections = [];
+  const seen = new Set();
+
+  for (const meta of MODULE_COVERAGE) {
+    const bucket = byModule.get(meta.reportModule);
+    if (!bucket || bucket.tests.length === 0) continue;
+    seen.add(meta.reportModule);
+
+    const points = meta.pointsFor(bucket.ids);
+    // Fallback: derive short lines from titles if mapping missed IDs.
+    const coveragePoints =
+      points.length > 0
+        ? points.slice(0, 3)
+        : bucket.tests.slice(0, 3).map((t) => readableTitle(t));
+
+    for (const t of bucket.known) {
+      coveragePoints.push(
+        `⚠️ Known defect: ${t.testId || 'unknown'} — ${shortDefectReason(t)}`,
+      );
+    }
+    for (const t of bucket.failed.slice(0, 3)) {
+      coveragePoints.push(`🔴 Unexpected failure: ${t.testId || t.title || 'unknown'}`);
+    }
+
+    sections.push({
+      module: meta.reportModule,
+      label: meta.label,
+      emoji: meta.emoji,
+      points: coveragePoints,
+    });
+  }
+
+  // Any executed module not in the catalog (should be rare).
+  for (const [mod, bucket] of byModule.entries()) {
+    if (seen.has(mod) || bucket.tests.length === 0) continue;
+    const points = bucket.tests.slice(0, 3).map((t) => readableTitle(t));
+    for (const t of bucket.known) {
+      points.push(`⚠️ Known defect: ${t.testId || 'unknown'} — ${shortDefectReason(t)}`);
+    }
+    for (const t of bucket.failed.slice(0, 3)) {
+      points.push(`🔴 Unexpected failure: ${t.testId || t.title || 'unknown'}`);
+    }
+    sections.push({
+      module: mod,
+      label: mod,
+      emoji: '•',
+      points,
+    });
+  }
+
+  return sections;
+}
+
+function readableTitle(t) {
+  const raw = String(t.scenario || t.title || t.testId || 'coverage').trim();
+  const stripped = raw
+    .replace(/^[A-Z]+-\d+(?:\s+@\S+)*\s*-\s*/i, '')
+    .replace(/@\S+/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return stripped || raw;
 }
 
 function buildTextMessage(report, opts) {
@@ -93,90 +350,80 @@ function buildTextMessage(report, opts) {
   const env = cycle.environment || 'QA';
   const outcome = cycleOutcome(cycle);
   const projects = (cycle.projects || ['desktop-1440']).join(', ');
-  const { runUrl, dashboardUrl } = resolveLinks(opts);
+  const runUrl = (opts.runUrl || '').trim();
+  const total = counts.total ?? 0;
+  const passed = counts.passed ?? 0;
+  const failed = counts.failed ?? 0;
+  const skipped = counts.skipped ?? 0;
+  const knownDefects = counts.knownDefects ?? 0;
+  const unexpected = counts.unexpectedFailures ?? failed;
+
   const lines = [];
   lines.push(`🔍 Search UI Daily Smoke — ${env}`);
   lines.push('');
   lines.push(`${outcome.emoji} ${outcome.label}`);
   lines.push('');
-  lines.push(`Total: ${counts.total ?? 'n/a'}`);
-  lines.push(`Passed: ${counts.passed ?? 'n/a'}`);
-  lines.push(`Failed: ${counts.failed ?? 'n/a'}`);
-  lines.push(`Skipped: ${counts.skipped ?? 'n/a'}`);
-  lines.push(`Known Defects: ${counts.knownDefects ?? 'n/a'}`);
-  if ((counts.unexpectedFailures ?? counts.failed ?? 0) > 0) {
-    lines.push(`Unexpected Failures: ${counts.unexpectedFailures ?? counts.failed}`);
-  }
+  lines.push(`${passed}/${total} passed`);
+  lines.push(`${failed} failed`);
+  lines.push(`${skipped} skipped`);
+  lines.push(`${knownDefects} known defects`);
+  if (unexpected > 0) lines.push(`${unexpected} unexpected failures`);
   lines.push(`Duration: ${fmtDuration(cycle.wallClockMs)}`);
   lines.push('');
   lines.push(`Browser: ${cycle.browser || 'Chromium'}`);
   lines.push(`Viewport: ${projects}`);
 
-  const known = (report.tests || []).filter((t) => t.cycleStatus === 'KNOWN DEFECT');
-  if (known.length) {
+  const coverage = buildCoverageSections(report);
+  if (coverage.length) {
     lines.push('');
-    lines.push('Known Defect:');
-    for (const t of known.slice(0, 5)) {
-      const reason = (t.knownDefectReason || t.error || 'known defect').split('\n')[0];
-      lines.push(`${t.testId} — ${reason.slice(0, 120)}`);
+    lines.push('Coverage:');
+    for (const section of coverage) {
+      lines.push(`${section.emoji} ${section.label}`);
+      for (const point of section.points) {
+        lines.push(`• ${point}`);
+      }
+      lines.push('');
     }
   }
 
-  const failed = (report.tests || []).filter(
-    (t) => t.status === 'failed' && t.cycleStatus !== 'KNOWN DEFECT',
+  lines.push(
+    `📊 Detailed report: Download \`search-ui-smoke-dashboard.html\` from the workflow artifacts (\`${opts.artifactName}\`).`,
   );
-  if (failed.length) {
-    lines.push('');
-    lines.push('Failed Tests:');
-    for (const t of failed.slice(0, 8)) {
-      lines.push(`• ${t.testId || t.title || 'unknown'}`);
-    }
-  }
-
-  lines.push('');
-  if (dashboardUrl) {
-    lines.push(`📊 View Detailed Dashboard: ${dashboardUrl}`);
-  } else {
-    lines.push(
-      `📊 View Detailed Dashboard: unavailable (publish HTML to GitHub Pages; artifact zip is not a browser URL)`,
-    );
-  }
   if (runUrl) {
     lines.push(`🔗 View GitHub Actions Run: ${runUrl}`);
   } else {
     lines.push('🔗 View GitHub Actions Run: (unavailable outside CI)');
   }
 
-  return lines.join('\n');
+  return lines.join('\n').trimEnd();
 }
 
-/**
- * Adaptive Card wrapped for Teams Workflow HTTP webhook triggers.
- * @see https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using
- */
 function buildAdaptiveCard(report, opts) {
   const cycle = report.cycle || {};
   const counts = cycle.counts || {};
   const env = cycle.environment || 'QA';
   const outcome = cycleOutcome(cycle);
   const projects = (cycle.projects || ['desktop-1440']).join(', ');
-  const { runUrl, dashboardUrl } = resolveLinks(opts);
+  const runUrl = (opts.runUrl || '').trim();
+  const total = counts.total ?? 0;
+  const passed = counts.passed ?? 0;
+  const failed = counts.failed ?? 0;
+  const skipped = counts.skipped ?? 0;
+  const knownDefects = counts.knownDefects ?? 0;
+  const unexpected = counts.unexpectedFailures ?? failed;
 
   const facts = [
-    { title: 'Total', value: String(counts.total ?? 'n/a') },
-    { title: 'Passed', value: String(counts.passed ?? 'n/a') },
-    { title: 'Failed', value: String(counts.failed ?? 'n/a') },
-    { title: 'Skipped', value: String(counts.skipped ?? 'n/a') },
-    { title: 'Known Defects', value: String(counts.knownDefects ?? 'n/a') },
+    { title: 'Result', value: `${passed}/${total} passed` },
+    { title: 'Failed', value: String(failed) },
+    { title: 'Skipped', value: String(skipped) },
+    { title: 'Known defects', value: String(knownDefects) },
   ];
-  if ((counts.unexpectedFailures ?? counts.failed ?? 0) > 0) {
-    facts.push({
-      title: 'Unexpected Failures',
-      value: String(counts.unexpectedFailures ?? counts.failed),
-    });
+  if (unexpected > 0) {
+    facts.push({ title: 'Unexpected failures', value: String(unexpected) });
   }
   facts.push(
     { title: 'Duration', value: fmtDuration(cycle.wallClockMs) },
+    { title: 'Environment', value: env },
     { title: 'Browser', value: cycle.browser || 'Chromium' },
     { title: 'Viewport', value: projects },
   );
@@ -205,77 +452,50 @@ function buildAdaptiveCard(report, opts) {
     },
   ];
 
-  const known = (report.tests || []).filter((t) => t.cycleStatus === 'KNOWN DEFECT');
-  if (known.length) {
+  const coverage = buildCoverageSections(report);
+  if (coverage.length) {
     body.push({
       type: 'TextBlock',
       weight: 'Bolder',
-      text: 'Known Defect',
+      text: 'Coverage',
       spacing: 'Medium',
       wrap: true,
     });
-    body.push({
-      type: 'TextBlock',
-      text: known
-        .slice(0, 5)
-        .map((t) => {
-          const reason = (t.knownDefectReason || t.error || 'known defect')
-            .split('\n')[0]
-            .slice(0, 120);
-          return `• **${t.testId}** — ${reason}`;
-        })
-        .join('\n'),
-      wrap: true,
-    });
+    for (const section of coverage) {
+      body.push({
+        type: 'TextBlock',
+        weight: 'Bolder',
+        text: `${section.emoji} ${section.label}`,
+        spacing: 'Small',
+        wrap: true,
+      });
+      body.push({
+        type: 'TextBlock',
+        text: section.points.map((p) => `• ${p}`).join('\n'),
+        wrap: true,
+        spacing: 'None',
+      });
+    }
   }
 
-  const failed = (report.tests || []).filter(
-    (t) => t.status === 'failed' && t.cycleStatus !== 'KNOWN DEFECT',
-  );
-  if (failed.length) {
-    body.push({
-      type: 'TextBlock',
-      weight: 'Bolder',
-      text: 'Failed Tests',
-      color: 'Attention',
-      spacing: 'Medium',
-      wrap: true,
-    });
-    body.push({
-      type: 'TextBlock',
-      text: failed
-        .slice(0, 8)
-        .map((t) => `• ${t.testId || t.title || 'unknown'}`)
-        .join('\n'),
-      wrap: true,
-    });
-  }
-
-  if (!dashboardUrl) {
-    body.push({
-      type: 'TextBlock',
-      text: runUrl
-        ? 'HTML dashboard link unavailable until GitHub Pages publish succeeds. Download `search-ui-smoke-dashboard.html` from the Actions run artifacts if needed.'
-        : `Dashboard artifact: \`${opts.artifactName}\` → search-ui-smoke-dashboard.html`,
-      isSubtle: true,
-      wrap: true,
-      spacing: 'Medium',
-    });
-  }
+  body.push({
+    type: 'TextBlock',
+    text: `📊 Detailed report: Download \`search-ui-smoke-dashboard.html\` from the workflow artifacts (\`${opts.artifactName}\`).`,
+    wrap: true,
+    spacing: 'Medium',
+  });
 
   const actions = [];
-  if (dashboardUrl) {
-    actions.push({
-      type: 'Action.OpenUrl',
-      title: '📊 View Detailed Dashboard',
-      url: dashboardUrl,
-    });
-  }
   if (runUrl) {
     actions.push({
       type: 'Action.OpenUrl',
       title: '🔗 View GitHub Actions Run',
       url: runUrl,
+    });
+    actions.push({
+      type: 'Action.OpenUrl',
+      title: '📦 Open run artifacts',
+      url: `${runUrl.replace(/#.*$/, '')}#artifacts`,
     });
   }
 
@@ -289,16 +509,14 @@ function buildAdaptiveCard(report, opts) {
   };
 }
 
-/** Workflow webhook envelope expected by Teams Power Automate HTTP triggers. */
 function buildTeamsPayload(report, opts) {
-  const card = buildAdaptiveCard(report, opts);
   return {
     type: 'message',
     attachments: [
       {
         contentType: 'application/vnd.microsoft.teams.card.adaptive',
         contentUrl: null,
-        content: card,
+        content: buildAdaptiveCard(report, opts),
       },
     ],
   };
@@ -334,11 +552,9 @@ async function main() {
     (ci.repository && ci.runId
       ? `${(ci.serverUrl || 'https://github.com').replace(/\/$/, '')}/${ci.repository}/actions/runs/${ci.runId}`
       : '');
-  const dashboardUrl = args.dashboardUrl || ci.dashboardUrl || '';
 
   const opts = {
     runUrl,
-    dashboardUrl,
     artifactName: args.artifactName || ci.artifactName || 'search-ui-smoke-reports',
   };
 
