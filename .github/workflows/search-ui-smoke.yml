@@ -94,7 +94,10 @@ jobs:
         id: smoke_run
         env:
           ENV: ${{ steps.env.outputs.target }}
+          # QA and production are different Vercel projects — use matching bypass secrets.
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          VERCEL_AUTOMATION_BYPASS_SECRET_QA: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          VERCEL_AUTOMATION_BYPASS_SECRET_PROD: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET_PROD }}
           UI_MODULE_WORKERS: '3'
           UI_PLAYWRIGHT_WORKERS: '2'
           PLAYWRIGHT_RETRIES: '1'
@@ -110,6 +113,20 @@ jobs:
           fi
           echo "ENV=${ENV}"
           echo "BASE_URL=${BASE_URL:-<default from environments.ts>}"
+          echo "Automation User-Agent=jmter-elastic-search"
+          if [ "$ENV" = "production" ]; then
+            if [ -z "${VERCEL_AUTOMATION_BYPASS_SECRET_PROD}" ] && [ -z "${VERCEL_AUTOMATION_BYPASS_SECRET}" ]; then
+              echo "::error::Production smoke requires VERCEL_AUTOMATION_BYPASS_SECRET_PROD (or VERCEL_AUTOMATION_BYPASS_SECRET) from the production Vercel project's Protection Bypass for Automation. User-Agent alone is not enough on prod."
+              exit 1
+            fi
+            echo "Vercel prod bypass secret: present"
+          else
+            if [ -z "${VERCEL_AUTOMATION_BYPASS_SECRET}" ]; then
+              echo "::warning::VERCEL_AUTOMATION_BYPASS_SECRET is empty — relying on User-Agent jmter-elastic-search for QA checkpoint bypass."
+            else
+              echo "Vercel QA bypass secret: present"
+            fi
+          fi
           if [ "${{ github.event.inputs.run_responsive }}" = "true" ]; then
             npm run test:smoke:responsive
           else

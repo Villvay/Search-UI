@@ -1,5 +1,8 @@
 import { expect, type Page } from '@playwright/test';
-import { getEnvironmentConfig } from '../../../config/environments';
+import {
+  describeVercelBypassConfig,
+  getEnvironmentConfig,
+} from '../../../config/environments';
 import { SearchBox } from '../components/SearchBox';
 import { BasePage } from './BasePage';
 
@@ -14,6 +17,20 @@ export class SearchPage extends BasePage {
   constructor(page: Page) {
     super(page);
     this.searchBox = new SearchBox(page);
+  }
+
+  private async checkpointBlockedError(
+    kind: 'page load' | 'SERP load',
+    attempt: number,
+    maxAttempts: number,
+  ): Promise<Error> {
+    const ua = await this.page.evaluate(() => navigator.userAgent).catch(() => 'unknown');
+    return new Error(
+      `Vercel Security Checkpoint blocked ${kind} (attempt ${attempt}/${maxAttempts}). ` +
+        `navigator.userAgent=${ua}. ${describeVercelBypassConfig()}. ` +
+        `QA uses User-Agent jmter-elastic-search; production also needs the prod project ` +
+        `Protection Bypass secret (VERCEL_AUTOMATION_BYPASS_SECRET_PROD).`,
+    );
   }
 
   /**
@@ -45,10 +62,7 @@ export class SearchPage extends BasePage {
         .catch(() => false);
 
       if (blockedEarly) {
-        const ua = await this.page.evaluate(() => navigator.userAgent).catch(() => 'unknown');
-        lastError = new Error(
-          `Vercel Security Checkpoint blocked page load (attempt ${attempt}/${maxAttempts}). navigator.userAgent=${ua}. Expected jmter-elastic-search, or set VERCEL_AUTOMATION_BYPASS_SECRET.`,
-        );
+        lastError = await this.checkpointBlockedError('page load', attempt, maxAttempts);
         continue;
       }
 
@@ -61,10 +75,7 @@ export class SearchPage extends BasePage {
           .isVisible()
           .catch(() => false);
         if (blockedLate) {
-          const ua = await this.page.evaluate(() => navigator.userAgent).catch(() => 'unknown');
-          lastError = new Error(
-            `Vercel Security Checkpoint blocked page load (attempt ${attempt}/${maxAttempts}). navigator.userAgent=${ua}. Expected jmter-elastic-search, or set VERCEL_AUTOMATION_BYPASS_SECRET.`,
-          );
+          lastError = await this.checkpointBlockedError('page load', attempt, maxAttempts);
         }
         if (attempt < maxAttempts) {
           continue;
@@ -107,10 +118,7 @@ export class SearchPage extends BasePage {
         .catch(() => false);
 
       if (blockedEarly) {
-        const ua = await this.page.evaluate(() => navigator.userAgent).catch(() => 'unknown');
-        lastError = new Error(
-          `Vercel Security Checkpoint blocked SERP load (attempt ${attempt}/${maxAttempts}). navigator.userAgent=${ua}. Expected jmter-elastic-search, or set VERCEL_AUTOMATION_BYPASS_SECRET.`,
-        );
+        lastError = await this.checkpointBlockedError('SERP load', attempt, maxAttempts);
         continue;
       }
 
@@ -129,10 +137,7 @@ export class SearchPage extends BasePage {
           .isVisible()
           .catch(() => false);
         if (blockedLate) {
-          const ua = await this.page.evaluate(() => navigator.userAgent).catch(() => 'unknown');
-          lastError = new Error(
-            `Vercel Security Checkpoint blocked SERP load (attempt ${attempt}/${maxAttempts}). navigator.userAgent=${ua}. Expected jmter-elastic-search, or set VERCEL_AUTOMATION_BYPASS_SECRET.`,
-          );
+          lastError = await this.checkpointBlockedError('SERP load', attempt, maxAttempts);
         }
         if (attempt < maxAttempts) {
           continue;

@@ -49,10 +49,14 @@ Optional overrides (via `.env` or shell):
 |---|---|
 | `ENV` | `qa` \| `staging` \| `production` (default `qa`) |
 | `BASE_URL` | Override the selected environment’s base URL |
-| `VERCEL_AUTOMATION_BYPASS_SECRET` | Optional Vercel Deployment Protection bypass headers |
-| Automation `User-Agent` | Always sent as `jmter-elastic-search` (Playwright `userAgent` + header) to bypass the Vercel Security Checkpoint for this project |
+| `VERCEL_AUTOMATION_BYPASS_SECRET` | Shared / fallback Vercel Protection Bypass for Automation |
+| `VERCEL_AUTOMATION_BYPASS_SECRET_QA` | Optional QA-specific bypass (defaults to shared secret) |
+| `VERCEL_AUTOMATION_BYPASS_SECRET_PROD` | **Required for production** — bypass secret from the **production** Vercel project |
+| Automation `User-Agent` | Always sent as `jmter-elastic-search` (Playwright `userAgent` + header). Enough for QA checkpoint allowlist; production also needs the prod bypass secret. |
 
 Do not commit credentials or bypass secrets. Keep them in `.env` (gitignored) or CI secrets.
+
+**Production checkpoint:** QA and production are separate Vercel projects. The `jmter-elastic-search` User-Agent alone does not skip production’s “Failed to verify your browser” challenge. Create **Protection Bypass for Automation** on the production Vercel project and store it as GitHub secret `VERCEL_AUTOMATION_BYPASS_SECRET_PROD`. Playwright then sends it as `x-vercel-protection-bypass` (header + query) on every navigation.
 
 ## Viewport configuration
 
@@ -141,7 +145,7 @@ npx playwright test --grep @responsive
 | `SKU_DATASET` | Path to SKU list JSON `{ "skus": [...] }` or catalog NDJSON for `npm run test:sku-plp` |
 | `SKU_LIMIT` | Cap unique SKUs loaded from the dataset |
 | `SKU_CACHE_SEQUENCES=0` | Disable A→B→C→A sequence expansion (run file order only) |
-| `ENV` / `BASE_URL` / `VERCEL_AUTOMATION_BYPASS_SECRET` | Target app + protection bypass |
+| `ENV` / `BASE_URL` / `VERCEL_AUTOMATION_BYPASS_SECRET` / `VERCEL_AUTOMATION_BYPASS_SECRET_PROD` | Target app + protection bypass |
 | `ENVIRONMENT` / `BARCODE_API_URL` | Barcode API target for `test:barcode` (`qa` \| `prod`) |
 | `BARCODES_JSON_PATH` / `BARCODES_CSV_PATH` / `SKU_SET` | Barcode dataset overrides (`SKU_SET`: `all` \| `yes` \| `no`) |
 
@@ -309,7 +313,8 @@ Official execution is via the existing workflows under `.github/workflows/` (cyc
 
 | Secret | Purpose |
 | --- | --- |
-| `VERCEL_AUTOMATION_BYPASS_SECRET` | Vercel Deployment Protection bypass |
+| `VERCEL_AUTOMATION_BYPASS_SECRET` | QA (and fallback) Vercel Protection Bypass for Automation |
+| `VERCEL_AUTOMATION_BYPASS_SECRET_PROD` | **Production** Vercel project Protection Bypass (required for `ENV=production` smoke/regression) |
 | `TEAMS_SEARCH_UI_WEBHOOK` | Microsoft Teams **Workflow** webhook URL (Adaptive Card) for smoke notifications |
 
 **Optional repository variables:**

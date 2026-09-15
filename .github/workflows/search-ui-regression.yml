@@ -65,6 +65,8 @@ jobs:
         env:
           ENV: ${{ github.event.inputs.environment || 'qa' }}
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          VERCEL_AUTOMATION_BYPASS_SECRET_QA: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          VERCEL_AUTOMATION_BYPASS_SECRET_PROD: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET_PROD }}
           # Existing cycle defaults: module workers 2, playwright workers 2, retries 1
           UI_MODULE_WORKERS: '2'
           UI_PLAYWRIGHT_WORKERS: '2'
@@ -80,6 +82,14 @@ jobs:
           fi
           echo "ENV=${ENV}"
           echo "BASE_URL=${BASE_URL:-<default from environments.ts>}"
+          echo "Automation User-Agent=jmter-elastic-search"
+          if [ "$ENV" = "production" ]; then
+            if [ -z "${VERCEL_AUTOMATION_BYPASS_SECRET_PROD}" ] && [ -z "${VERCEL_AUTOMATION_BYPASS_SECRET}" ]; then
+              echo "::error::Production regression requires VERCEL_AUTOMATION_BYPASS_SECRET_PROD (or VERCEL_AUTOMATION_BYPASS_SECRET) from the production Vercel project's Protection Bypass for Automation."
+              exit 1
+            fi
+            echo "Vercel prod bypass secret: present"
+          fi
           if [ "${{ github.event.inputs.run_responsive }}" = "true" ]; then
             npm run test:regression:responsive
           else

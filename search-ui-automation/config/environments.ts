@@ -81,6 +81,8 @@ export function getEnvironmentLabel(config = getEnvironmentConfig()): Environmen
 /**
  * User-Agent recognized by WBS Vercel edge to skip the Security Checkpoint.
  * Applied on every browser context (headers + Playwright userAgent).
+ * QA allowlists this UA; production typically also needs Protection Bypass
+ * (`VERCEL_AUTOMATION_BYPASS_SECRET_PROD`) because prod is a separate Vercel project.
  */
 export const AUTOMATION_USER_AGENT = 'jmter-elastic-search';
 
@@ -88,16 +90,47 @@ export function getAutomationUserAgent(): string {
   return AUTOMATION_USER_AGENT;
 }
 
+/**
+ * Resolve the Vercel Protection Bypass for Automation secret for the active target.
+ *
+ * Prefer env-specific secrets so QA and production (different Vercel projects)
+ * can use different bypass tokens:
+ * - production → VERCEL_AUTOMATION_BYPASS_SECRET_PROD || VERCEL_AUTOMATION_BYPASS_SECRET
+ * - qa/staging → VERCEL_AUTOMATION_BYPASS_SECRET_QA || VERCEL_AUTOMATION_BYPASS_SECRET
+ */
 export function getVercelBypassSecret(): string | undefined {
-  const secret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.trim();
-  return secret || undefined;
+  const env = getEnvironmentLabel();
+  if (env === 'production') {
+    return (
+      process.env.VERCEL_AUTOMATION_BYPASS_SECRET_PROD?.trim() ||
+      process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.trim() ||
+      undefined
+    );
+  }
+  return (
+    process.env.VERCEL_AUTOMATION_BYPASS_SECRET_QA?.trim() ||
+    process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.trim() ||
+    undefined
+  );
+}
+
+/** Short diagnostic for checkpoint failures (never logs the secret value). */
+export function describeVercelBypassConfig(): string {
+  const env = getEnvironmentLabel();
+  const hasSecret = Boolean(getVercelBypassSecret());
+  const secretHint =
+    env === 'production'
+      ? 'VERCEL_AUTOMATION_BYPASS_SECRET_PROD (or VERCEL_AUTOMATION_BYPASS_SECRET)'
+      : 'VERCEL_AUTOMATION_BYPASS_SECRET (or VERCEL_AUTOMATION_BYPASS_SECRET_QA)';
+  return `ENV=${env}; User-Agent=${AUTOMATION_USER_AGENT}; bypassSecret=${hasSecret ? 'set' : `missing — set ${secretHint}`}`;
 }
 
 /**
  * HTTP headers applied to every Playwright request.
  * Always includes the automation User-Agent checkpoint bypass.
- * When VERCEL_AUTOMATION_BYPASS_SECRET is set, also sends official
- * Vercel protection-bypass headers (and sets the bypass cookie).
+ * When a bypass secret is set, also sends official Vercel protection-bypass
+ * headers (and sets the bypass cookie) — required for production Protection /
+ * Bot Challenge when the UA allowlist is QA-only.
  */
 export function getVercelBypassHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
@@ -118,6 +151,7 @@ export function getVercelBypassHeaders(): Record<string, string> {
  * Appends Vercel automation bypass as query params.
  * WebKit sometimes fails header-only bypass / bot checks; query + cookie
  * redirect is the documented fallback for browser automation.
+ * Also required for production when header-only bypass is stripped.
  */
 export function withVercelBypassQuery(pathOrUrl: string): string {
   const secret = getVercelBypassSecret();
