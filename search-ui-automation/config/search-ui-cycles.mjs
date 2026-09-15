@@ -5,9 +5,10 @@
  * Paths and IDs are taken from modules present in this repository.
  *
  * Audit notes (production readiness):
- * - Smoke discovery: 29 unique @smoke tests × desktop-1440 only (no Chromium alias dupes).
+ * - Smoke discovery: 39 unique @smoke tests × desktop-1440 only (no Chromium alias dupes).
  * - Each module is a single spec path; module-level parallel processes do not re-run the same file.
  * - Analytics / sku-plp-cache / framework are excluded from both cycles.
+ * - Barcode / QR navigation is included: smoke = 10 SKUs (@smoke), regression = 50 SKUs.
  * - Responsive runs only when --responsive or SMOKE_RESPONSIVE=1.
  */
 
@@ -30,6 +31,7 @@ export const CYCLE_BROWSER = 'Chromium';
 /**
  * Module catalog used by cycle runners (mirrors functional suite paths).
  * Analytics and sku-plp-cache are intentionally excluded from Search UI cycles.
+ * Barcode-navigation is included (limited SKU counts per cycle).
  * Paths point at specific functional specs (never analytics sibling specs).
  */
 export const CYCLE_MODULE_CATALOG = {
@@ -111,6 +113,13 @@ export const CYCLE_MODULE_CATALOG = {
     path: 'src/modules/search-input-robustness/tests/search-input-robustness.spec.ts',
     reportModule: 'SEARCH INPUT ROBUSTNESS',
   },
+  'barcode-navigation': {
+    id: 'barcode-navigation',
+    label: 'Barcode / QR Navigation',
+    shortLabel: 'BARCODE',
+    path: 'src/modules/barcode-navigation/tests/barcode-navigation.spec.ts',
+    reportModule: 'BARCODE NAVIGATION',
+  },
 };
 
 /**
@@ -169,8 +178,9 @@ export const CYCLE_EXCLUSIONS = {
  *   CACHE-001, CACHE-002, CACHE-003, CACHE-006, CACHE-008
  *   INPUT-001, INPUT-007, INPUT-008
  *   SORT-001  (documents absent sorting UI — meaningful contract check)
+ *   BARCODE-001…010  (barcode/QR → single PLP product)
  *
- * Expected discovery: 29 tests on desktop-1440.
+ * Expected discovery: 39 tests on desktop-1440.
  */
 export const SMOKE_CYCLE = {
   id: 'smoke',
@@ -195,6 +205,7 @@ export const SMOKE_CYCLE = {
     'cache-state',
     'search-input-robustness',
     'sorting',
+    'barcode-navigation',
   ],
   /** Not in smoke (no meaningful @smoke / unsupported feature surface). */
   excludedModuleIds: ['related-searches'],
@@ -209,7 +220,7 @@ export const SMOKE_CYCLE = {
   defaultPlaywrightWorkers: 2,
   /** One retry absorbs intermittent env blips without masking real defects. */
   defaultRetries: 1,
-  expectedSmokeTestCount: 29,
+  expectedSmokeTestCount: 39,
 };
 
 /**
@@ -240,6 +251,7 @@ export const REGRESSION_CYCLE = {
     'runtime-errors',
     'cache-state',
     'search-input-robustness',
+    'barcode-navigation',
   ],
   excludedModuleIds: [],
   artifactPrefix: 'search-ui-regression',

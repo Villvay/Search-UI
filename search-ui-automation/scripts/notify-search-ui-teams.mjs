@@ -178,6 +178,17 @@ const MODULE_COVERAGE = [
     },
   },
   {
+    reportModule: 'BARCODE NAVIGATION',
+    label: 'Barcode / QR Navigation',
+    pointsFor(ids) {
+      const count = [...ids].filter((id) => id.startsWith('BARCODE-')).length;
+      if (count <= 0) return [];
+      return [
+        `${count} barcode/SKU lookup(s) validated for single-product PLP navigation`,
+      ];
+    },
+  },
+  {
     reportModule: 'RELATED SEARCHES',
     label: 'Related Searches',
     pointsFor(ids) {

@@ -87,6 +87,7 @@ function moduleFromFile(file = '') {
   if (normalized.includes('/modules/related-searches/')) return 'RELATED SEARCHES';
   if (normalized.includes('/modules/filters-facets/')) return 'FILTERS & FACETS';
   if (normalized.includes('/modules/sorting/')) return 'SORTING';
+  if (normalized.includes('/modules/barcode-navigation/')) return 'BARCODE NAVIGATION';
   if (normalized.includes('framework-validation')) return 'FRAMEWORK';
   return 'OTHER';
 }

@@ -93,6 +93,11 @@ const MODULE_CATALOG = {
     label: 'SORTING',
     path: 'src/modules/sorting/tests/sorting.spec.ts',
   },
+  'barcode-navigation': {
+    id: 'barcode-navigation',
+    label: 'BARCODE NAVIGATION',
+    path: 'src/modules/barcode-navigation/tests/barcode-navigation.spec.ts',
+  },
   'related-searches': {
     id: 'related-searches',
     label: 'RELATED SEARCHES',
