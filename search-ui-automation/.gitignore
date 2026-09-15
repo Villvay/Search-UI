@@ -18,6 +18,14 @@ reports/sku-plp/
 reports/sku-plp-inspect.json
 reports/sku-plp-inspect-deep.json
 src/test-data/sku-plp/skus-all.json
+
+# Barcode / QR navigation (Python) run artifacts
+barcode-navigation-validation/output/*
+!barcode-navigation-validation/output/.gitkeep
+!barcode-navigation-validation/output/sample_*
+barcode-navigation-validation/**/__pycache__/
+barcode-navigation-validation/**/*.pyc
+barcode-navigation-validation/.pytest_cache/
 reports/*.log
 reports/traces/
 blob-report/

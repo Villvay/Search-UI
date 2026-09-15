@@ -103,6 +103,7 @@ search-ui-automation/
 | **Analytics smoke** | `npm run test:analytics:smoke` | Chromium `desktop-1440`, **15** representative queries from the full analytics dataset × 3 modules |
 | **Full analytics** | `npm run test:analytics` | Chromium `desktop-1440`, **complete** analytics dataset (currently Non-SKU top **50**) × 3 modules |
 | **Batched analytics** | `npm run test:analytics:batched` | New SKU/Non-SKU top-50 dataset (**200** rows); **Browser/Viewport → all queries × 3 modules** on one page before next viewport |
+| **Barcode / QR navigation** | `npm run test:barcode-nav` | Playwright API: barcode → single PLP (`BARCODE-001`…); smoke = 10, regression = 50. Full Python dataset: `npm run test:barcode` |
 
 Recommended tiers:
 
@@ -141,6 +142,8 @@ npx playwright test --grep @responsive
 | `SKU_LIMIT` | Cap unique SKUs loaded from the dataset |
 | `SKU_CACHE_SEQUENCES=0` | Disable A→B→C→A sequence expansion (run file order only) |
 | `ENV` / `BASE_URL` / `VERCEL_AUTOMATION_BYPASS_SECRET` | Target app + protection bypass |
+| `ENVIRONMENT` / `BARCODE_API_URL` | Barcode API target for `test:barcode` (`qa` \| `prod`) |
+| `BARCODES_JSON_PATH` / `BARCODES_CSV_PATH` / `SKU_SET` | Barcode dataset overrides (`SKU_SET`: `all` \| `yes` \| `no`) |
 
 Examples:
 
@@ -224,6 +227,14 @@ ENV=qa INCLUDE_SAFARI=1 npm run test:on-type -- --project=desktop-1440-safari
 ENV=qa npm run test:search-ui
 ENV=qa npm run test:sku-plp
 SKU_LIMIT=5 ENV=qa npm run test:sku-plp
+
+# Barcode / QR → PLP API validation (cycle module: 10 smoke / 50 regression)
+npm run test:barcode-nav:smoke
+npm run test:barcode-nav
+
+# Full Python barcode suite (large dataset; optional, outside cycles)
+npm run test:barcode:sample
+npm run test:barcode
 ```
 
 Runtime before/after measurements for the fast profiles live in [`reports/runtime-comparison.md`](./reports/runtime-comparison.md).
@@ -240,7 +251,7 @@ Fast desktop health check on `desktop-1440` using existing `@smoke` tests:
 npm run test:smoke
 ```
 
-**Includes:** On-Type, Suggestions, On-Enter, Trending Now, Recent Searches, Filters & Facets, Runtime Errors, Cache & State (`@smoke` only — not `CACHE-005`), Search Input Robustness (`INPUT-001` / `007` / `008`), Sorting (`SORT-001` absence contract).
+**Includes:** On-Type, Suggestions, On-Enter, Trending Now, Recent Searches, Filters & Facets, Runtime Errors, Cache & State (`@smoke` only — not `CACHE-005`), Search Input Robustness (`INPUT-001` / `007` / `008`), Sorting (`SORT-001` absence contract), Barcode / QR Navigation (`BARCODE-001`…`010`, 10 SKUs).
 
 **Excludes:** Related Searches (no `@smoke` IDs), analytics, sku-plp-cache, framework validation.
 
@@ -263,7 +274,7 @@ All applicable functional modules on `desktop-1440` (module-level parallel; resp
 npm run test:regression
 ```
 
-**Includes:** on-type, suggestions, trending-now, recent-searches, on-enter, related-searches, filters, sorting, runtime-errors, cache-state, search-input-robustness.
+**Includes:** on-type, suggestions, trending-now, recent-searches, on-enter, related-searches, filters, sorting, runtime-errors, cache-state, search-input-robustness, barcode-navigation (`BARCODE-001`…`050`, 50 SKUs).
 
 **Known defect:** `CACHE-005` stays a failing assertion; the cycle report labels it **KNOWN DEFECT**. Unexpected failures fail the cycle; known defects alone do not.
 

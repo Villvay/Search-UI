@@ -1,0 +1,154 @@
+{
+  "summary": {
+    "barcode_api_url": "https://search-api-wurthbaer-qa.search-villvay.workers.dev/barcode",
+    "environment": "qa",
+    "barcodes_csv": "/Users/nimeshaweerasinghe/Desktop/QA-Search-main/barcode_navigation_validation/input/barcodes.csv",
+    "generated_at": "2026-07-20 09:33:03",
+    "total_tested": 6,
+    "passed": 3,
+    "failed": 3,
+    "execution_time_s": 0.0
+  },
+  "results": [
+    {
+      "barcode": "FL6903-20MC-48",
+      "expected": "success",
+      "status": "PASS",
+      "reason": "",
+      "http_status": 200,
+      "product_id": "FL6903-20MC-48",
+      "product_name": "Formica 6903 Cassis laminate 48x96 Microdot",
+      "total_results": 1,
+      "plp": true,
+      "execution_time_ms": 18.5,
+      "raw_response": {
+        "summary": {
+          "total": 1,
+          "page": 1,
+          "pageSize": 20,
+          "totalPages": 1,
+          "plp": true,
+          "layerBreakdown": {
+            "barcodeSearch": 1
+          }
+        },
+        "results": {
+          "plpProduct": {
+            "id": 651477,
+            "materialNumber": "FL6903-20MC-48",
+            "primaryProductTitle": "Formica 6903 Cassis laminate 48x96 Microdot",
+            "sapId": "10290815"
+          }
+        }
+      }
+    },
+    {
+      "barcode": "FL463-20MC-48",
+      "expected": "success",
+      "status": "PASS",
+      "reason": "",
+      "http_status": 200,
+      "product_id": "FL463-20MC-48",
+      "product_name": "Formica 463 Antique White laminate 48x96 Microdot",
+      "total_results": 1,
+      "plp": true,
+      "execution_time_ms": 16.2,
+      "raw_response": {
+        "summary": {
+          "total": 1,
+          "page": 1,
+          "pageSize": 20,
+          "plp": true
+        },
+        "results": {
+          "plpProduct": {
+            "id": 651201,
+            "materialNumber": "FL463-20MC-48",
+            "primaryProductTitle": "Formica 463 Antique White laminate 48x96 Microdot"
+          }
+        }
+      }
+    },
+    {
+      "barcode": "FL909-20MC-48",
+      "expected": "success",
+      "status": "PASS",
+      "reason": "",
+      "http_status": 200,
+      "product_id": "FL909-20MC-48",
+      "product_name": "Formica 909 Folkloric Blue laminate 48x96 Microdot",
+      "total_results": 1,
+      "plp": true,
+      "execution_time_ms": 14.8,
+      "raw_response": {
+        "summary": {
+          "total": 1,
+          "page": 1,
+          "pageSize": 20,
+          "plp": true
+        },
+        "results": {
+          "plpProduct": {
+            "id": 651300,
+            "materialNumber": "FL909-20MC-48",
+            "primaryProductTitle": "Formica 909 Folkloric Blue laminate 48x96 Microdot"
+          }
+        }
+      }
+    },
+    {
+      "barcode": "088381234567",
+      "expected": "success",
+      "status": "FAIL",
+      "reason": "No product returned",
+      "http_status": 200,
+      "product_id": "",
+      "product_name": "",
+      "total_results": 0,
+      "plp": false,
+      "execution_time_ms": 11.0,
+      "raw_response": {
+        "summary": {
+          "total": 0,
+          "page": 1,
+          "pageSize": 20,
+          "totalPages": 0,
+          "plp": false
+        }
+      }
+    },
+    {
+      "barcode": "099991111111",
+      "expected": "success",
+      "status": "FAIL",
+      "reason": "No product returned",
+      "http_status": 200,
+      "product_id": "",
+      "product_name": "",
+      "total_results": 0,
+      "plp": false,
+      "execution_time_ms": 10.4,
+      "raw_response": {
+        "summary": {
+          "total": 0,
+          "page": 1,
+          "pageSize": 20,
+          "plp": false
+        }
+      }
+    },
+    {
+      "barcode": "123456789012",
+      "expected": "success",
+      "status": "FAIL",
+      "reason": "HTTP 500",
+      "http_status": 500,
+      "product_id": "",
+      "product_name": "",
+      "total_results": 0,
+      "plp": false,
+      "execution_time_ms": 8.1,
+      "raw_response": {}
+    }
+  ]
+}

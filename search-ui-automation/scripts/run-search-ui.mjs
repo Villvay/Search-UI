@@ -32,6 +32,7 @@ const SUITES = [
   'src/modules/related-searches/tests',
   'src/modules/filters-facets/tests',
   'src/modules/sorting/tests',
+  'src/modules/barcode-navigation/tests',
   'tests/framework-validation.spec.ts',
 ];
 
