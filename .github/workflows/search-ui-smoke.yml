@@ -13,7 +13,7 @@ on:
       environment:
         description: 'Target environment (qa | production)'
         required: true
-        default: 'production'
+        default: 'qa'
         type: choice
         options:
           - qa
