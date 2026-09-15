@@ -1,17 +1,17 @@
 {
-  "source": "plp_redirect_ALL_skus.json#yes_skus",
+  "source": "QA-Search-main barcode_navigation_validation output/versions/v5 (prod PASS, 2026-07-31)",
   "profile": "smoke",
   "limit": 10,
   "skus": [
-    "AA201004",
-    "AA201005",
-    "AA201006",
-    "AA201007",
-    "AA201008",
-    "AA201010",
-    "AA201015",
-    "AA203151",
-    "AA203152",
-    "AA203201"
+    "WW614176274",
+    "BPPOZIDRIVER",
+    "BPPOZIBIT",
+    "WW614176652",
+    "WW92210",
+    "WW614176461",
+    "WW90210",
+    "WW91210",
+    "WW92220",
+    "WW90220"
   ]
 }

@@ -18,7 +18,9 @@ Validates that barcode / QR / material-number lookups return a **single** produc
 | Smoke | `data/smoke-skus.json` (first 10 of regression set) | **10** | `@smoke` on `BARCODE-001`…`010` |
 | Regression | `data/regression-skus.json` | **50** | `BARCODE-001`…`050` |
 
-SKUs are curated from `plp_redirect_ALL_skus.json` `yes_skus` (clean material numbers).
+SKUs:
+- Smoke (`BARCODE-001`…`010`): 10 materialNumbers that **PASS**ed on production barcode run `versions/v5` (2026-07-31).
+- Regression (`BARCODE-001`…`050`): those 10 smoke SKUs plus 40 additional curated SKUs.
 
 ## Commands
 

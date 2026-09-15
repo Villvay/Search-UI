@@ -1,8 +1,18 @@
 {
-  "source": "plp_redirect_ALL_skus.json#yes_skus",
+  "source": "smoke: prod v5 PASS materialNumbers; rest: plp_redirect_ALL_skus.json#yes_skus",
   "profile": "regression",
   "limit": 50,
   "skus": [
+    "WW614176274",
+    "BPPOZIDRIVER",
+    "BPPOZIBIT",
+    "WW614176652",
+    "WW92210",
+    "WW614176461",
+    "WW90210",
+    "WW91210",
+    "WW92220",
+    "WW90220",
     "AA201004",
     "AA201005",
     "AA201006",
@@ -42,16 +52,6 @@
     "AA304032",
     "AA305005",
     "AA305008",
-    "AA306005",
-    "AA306008",
-    "AA313005",
-    "AA313008",
-    "AA314005",
-    "AA314006",
-    "AA314007",
-    "AA314008",
-    "AA317015",
-    "AA3400-TIM",
-    "AA3402-TIM"
+    "AA306005"
   ]
 }
