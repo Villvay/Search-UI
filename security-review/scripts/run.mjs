@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * Run the passive security-review module against a configurable website URL.
+ * Run the standalone security-review module against a configurable website URL.
  *
  * Usage:
- *   npm run test:security-review
- *   npm run test:security-review -- --url=https://next-baersupply.vercel.app
- *   npm run test:security-review -- --url=https://qa-baersupply.vercel.app --fail-on=none
- *   ENV=production npm run test:security-review
+ *   npm test
+ *   npm test -- --url=https://next-baersupply.vercel.app
+ *   npm test -- --url=https://qa-baersupply.vercel.app --fail-on=none
+ *   ENV=production npm test
  */
 import { spawn } from 'child_process';
 import path from 'path';
@@ -78,7 +78,7 @@ const child = spawn(
   [
     'playwright',
     'test',
-    '--config=playwright.security-review.config.ts',
+    '--config=playwright.config.ts',
     '--project=chromium',
     '--workers=1',
     '--retries=0',

@@ -60,9 +60,7 @@
     "test:analytics:on-enter": "playwright test src/modules/on-enter/tests/on-enter-analytics.spec.ts --project=desktop-1440",
     "test:analytics:report": "node scripts/generate-analytics-report.mjs",
     "test:daily": "playwright test --project=desktop-1440 --project=mobile-390 --grep @analytics",
-    "test:nightly": "playwright test --grep \"@responsive|@analytics\"",
-    "test:security-review": "node scripts/run-security-review.mjs",
-    "test:security-review:open": "node scripts/run-security-review.mjs --open"
+    "test:nightly": "playwright test --grep \"@responsive|@analytics\""
   },
   "devDependencies": {
     "@playwright/test": "1.61.1",

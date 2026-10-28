@@ -1,4 +1,4 @@
-import { test, expect } from '../../../core/fixtures';
+import { expect, test } from '@playwright/test';
 import { loadSecurityReviewConfig } from '../config';
 import { findingsMatchingFailOn, writeSecurityReviewReports } from '../report';
 import { runSecurityReview } from '../runReview';

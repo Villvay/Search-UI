@@ -2,7 +2,7 @@ import type { APIRequestContext, Browser, Page, Request, Response } from '@playw
 import {
   getAutomationUserAgent,
   getVercelBypassHeaders,
-} from '../../../config/environments';
+} from './env';
 import {
   absoluteUrl,
   type SecurityReviewConfig,

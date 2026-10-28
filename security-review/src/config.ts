@@ -1,5 +1,5 @@
 import path from 'path';
-import { getEnvironmentConfig } from '../../../config/environments';
+import { resolveDefaultBaseURL } from './env';
 
 export type FailOnLevel = 'none' | 'critical' | 'high' | 'medium' | 'all';
 
@@ -43,12 +43,11 @@ const SENSITIVE_PATHS = [
 ];
 
 export function loadSecurityReviewConfig(): SecurityReviewConfig {
-  const env = getEnvironmentConfig();
   const override =
     argValue('url') ||
     process.env.SECURITY_REVIEW_BASE_URL?.trim() ||
     process.env.BASE_URL?.trim() ||
-    env.baseURL;
+    resolveDefaultBaseURL();
 
   return {
     baseURL: stripTrailingSlash(override),

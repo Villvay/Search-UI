@@ -1,19 +1,15 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 import path from 'path';
-import {
-  getEnvironmentConfig,
-  resolveHeadlessPreference,
-} from './config/environments';
+import { resolveDefaultBaseURL, resolveHeadlessPreference } from './src/env';
 
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
-const environment = getEnvironmentConfig();
 const headless = resolveHeadlessPreference();
 
 export default defineConfig({
-  testDir: '.',
-  testMatch: ['src/modules/security-review/tests/**/*.spec.ts'],
+  testDir: './src/tests',
+  testMatch: ['**/*.spec.ts'],
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: 0,
@@ -22,12 +18,12 @@ export default defineConfig({
   expect: { timeout: 15_000 },
   reporter: [
     ['list'],
-    ['html', { outputFolder: 'reports/html-security-review', open: 'never' }],
-    ['json', { outputFile: 'reports/playwright-results.security-review.json' }],
+    ['html', { outputFolder: 'reports/html-playwright', open: 'never' }],
+    ['json', { outputFile: 'reports/playwright-results.json' }],
   ],
-  outputDir: 'test-results/security-review',
+  outputDir: 'test-results',
   use: {
-    baseURL: environment.baseURL,
+    baseURL: resolveDefaultBaseURL(),
     screenshot: 'only-on-failure',
     video: 'off',
     trace: 'off',
