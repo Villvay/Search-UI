@@ -26,6 +26,10 @@ barcode-navigation-validation/output/*
 barcode-navigation-validation/**/__pycache__/
 barcode-navigation-validation/**/*.pyc
 barcode-navigation-validation/.pytest_cache/
+reports/security-review.json
+reports/security-review.html
+reports/playwright-results.security-review.json
+reports/html-security-review/
 reports/*.log
 reports/traces/
 blob-report/

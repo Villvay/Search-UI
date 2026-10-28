@@ -191,6 +191,8 @@ npm run test:filters:responsive
 npm run test:sorting
 npm run test:sorting:responsive
 npm run test:sku-plp
+npm run test:security-review
+# Optional URL override: npm run test:security-review -- --url=https://next-baersupply.vercel.app
 
 # Full Search UI suite (feature modules + framework validation × viewports)
 npm run test:search-ui
@@ -235,6 +237,12 @@ SKU_LIMIT=5 ENV=qa npm run test:sku-plp
 # Barcode / QR → PLP API validation (cycle module: 10 smoke / 50 regression)
 npm run test:barcode-nav:smoke
 npm run test:barcode-nav
+
+# Passive security review of a configurable website URL
+# See src/modules/security-review/README.md
+npm run test:security-review
+npm run test:security-review -- --url=https://next-baersupply.vercel.app
+npm run test:security-review -- --fail-on=none --open
 
 # Full Python barcode suite (large dataset; optional, outside cycles)
 npm run test:barcode:sample
