@@ -1,0 +1,7 @@
+barcode,status,reason,http_status,product_id,product_name,execution_time_ms
+FL6903-20MC-48,PASS,,200,FL6903-20MC-48,Formica 6903 Cassis laminate 48x96 Microdot,18.5
+FL463-20MC-48,PASS,,200,FL463-20MC-48,Formica 463 Antique White laminate 48x96 Microdot,16.2
+FL909-20MC-48,PASS,,200,FL909-20MC-48,Formica 909 Folkloric Blue laminate 48x96 Microdot,14.8
+088381234567,FAIL,No product returned,200,,,11.0
+099991111111,FAIL,No product returned,200,,,10.4
+123456789012,FAIL,HTTP 500,500,,,8.1

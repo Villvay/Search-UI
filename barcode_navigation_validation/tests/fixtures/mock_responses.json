@@ -1,0 +1,98 @@
+{
+  "FL6903-20MC-48": {
+    "http_status": 200,
+    "error": "",
+    "execution_time_ms": 18.5,
+    "payload": {
+      "summary": {
+        "total": 1,
+        "page": 1,
+        "pageSize": 20,
+        "totalPages": 1,
+        "plp": true,
+        "layerBreakdown": { "barcodeSearch": 1 }
+      },
+      "results": {
+        "plpProduct": {
+          "id": 651477,
+          "materialNumber": "FL6903-20MC-48",
+          "primaryProductTitle": "Formica 6903 Cassis laminate 48x96 Microdot",
+          "sapId": "10290815"
+        }
+      }
+    }
+  },
+  "FL463-20MC-48": {
+    "http_status": 200,
+    "error": "",
+    "execution_time_ms": 16.2,
+    "payload": {
+      "summary": {
+        "total": 1,
+        "page": 1,
+        "pageSize": 20,
+        "plp": true
+      },
+      "results": {
+        "plpProduct": {
+          "id": 651201,
+          "materialNumber": "FL463-20MC-48",
+          "primaryProductTitle": "Formica 463 Antique White laminate 48x96 Microdot"
+        }
+      }
+    }
+  },
+  "FL909-20MC-48": {
+    "http_status": 200,
+    "error": "",
+    "execution_time_ms": 14.8,
+    "payload": {
+      "summary": {
+        "total": 1,
+        "page": 1,
+        "pageSize": 20,
+        "plp": true
+      },
+      "results": {
+        "plpProduct": {
+          "id": 651300,
+          "materialNumber": "FL909-20MC-48",
+          "primaryProductTitle": "Formica 909 Folkloric Blue laminate 48x96 Microdot"
+        }
+      }
+    }
+  },
+  "088381234567": {
+    "http_status": 200,
+    "error": "",
+    "execution_time_ms": 11.0,
+    "payload": {
+      "summary": {
+        "total": 0,
+        "page": 1,
+        "pageSize": 20,
+        "totalPages": 0,
+        "plp": false
+      }
+    }
+  },
+  "099991111111": {
+    "http_status": 200,
+    "error": "",
+    "execution_time_ms": 10.4,
+    "payload": {
+      "summary": {
+        "total": 0,
+        "page": 1,
+        "pageSize": 20,
+        "plp": false
+      }
+    }
+  },
+  "123456789012": {
+    "http_status": 500,
+    "error": "HTTP 500",
+    "execution_time_ms": 8.1,
+    "payload": {}
+  }
+}
