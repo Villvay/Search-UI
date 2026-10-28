@@ -1,0 +1,16 @@
+{
+  "wurthlac": {
+    "id": "wurthlac",
+    "label": "Würth LAC",
+    "url": "https://wurthlac.com/",
+    "dataset": "data/wurthlac.json",
+    "reportDir": "reports/wurthlac"
+  },
+  "wurthbaer": {
+    "id": "wurthbaer",
+    "label": "Würth Baer",
+    "url": "https://wurthbaersupply.com/",
+    "dataset": "data/wurthbaer.json",
+    "reportDir": "reports/wurthbaer"
+  }
+}
