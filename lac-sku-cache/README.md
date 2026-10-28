@@ -2,6 +2,8 @@
 
 Playwright check for stale search results on Würth LAC and Würth Baer. One Chrome window searches each SKU in order and does not reload between searches, so a leftover product page can show up the way it would for a shopper.
 
+This module is the top-level `lac-sku-cache` folder, next to `search-ui-automation`. Run the commands below from `lac-sku-cache`.
+
 The two stores do not share a catalog. Each site has its own URL, SKU file, and report folder. `SITE` selects which one runs.
 
 | `SITE` | Store | URL | SKU file | Reports |
@@ -22,8 +24,6 @@ The two stores do not share a catalog. Each site has its own URL, SKU file, and 
 A pass is a product page or a search-results page for the SKU just searched. A high failure is the previous SKU’s product still on screen. A medium failure is an empty or outdated search box, a page still navigating, or a failed search request.
 
 ## How Würth Baer runs
-
-From `search-ui-automation`:
 
 ```bash
 npm run test:sku-cache:baer
@@ -86,4 +86,4 @@ When a SKU file changes, add a new object under that site’s `versions` array, 
 | `LAC_BASE_URL` | Use a different URL for the selected site |
 | `LAC_REPORT_DIR` | Write reports somewhere else |
 
-Run the commands from `search-ui-automation`. Chrome must be installed. The browser stays headless.
+Run the commands from `lac-sku-cache` after `npm install`. Chrome must be installed. The browser stays headless.

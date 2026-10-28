@@ -1,6 +1,6 @@
 /**
  * Prints the Würth LAC 100-SKU cache report to a self-contained PDF.
- * Usage: node lac-sku-cache/scripts/generate-pdf.mjs
+ * Usage: node scripts/generate-pdf.mjs
  */
 import fs from 'node:fs';
 import path from 'node:path';

@@ -1,0 +1,16 @@
+{
+  "name": "lac-sku-cache",
+  "private": true,
+  "description": "SKU cache and navigation checks for Würth LAC and Würth Baer.",
+  "scripts": {
+    "test:lac-sku-cache": "SITE=wurthlac playwright test --config=playwright.config.js",
+    "test:lac-sku-cache:pdf": "SITE=wurthlac node scripts/generate-pdf.mjs",
+    "test:sku-cache:lac": "SITE=wurthlac playwright test --config=playwright.config.js",
+    "test:sku-cache:lac:pdf": "SITE=wurthlac node scripts/generate-pdf.mjs",
+    "test:sku-cache:baer": "SITE=wurthbaer playwright test --config=playwright.config.js",
+    "test:sku-cache:baer:pdf": "SITE=wurthbaer node scripts/generate-pdf.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1"
+  }
+}
