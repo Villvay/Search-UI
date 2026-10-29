@@ -151,17 +151,7 @@ Edit the module `data/queries.ts` file. Validate the query against `https://wurt
 - Guest storefront calls to `xcart.wurthlac.com/rest/auth/login-check` return HTTP 401; the runtime suite classifies that as expected guest auth, not a search defect.
 - Compact viewports (≤768px) focus the header search field without the desktop idle overlay.
 
-## 17. Unsupported or not yet verified
-
-| Feature | Status |
-|---|---|
-| Trending now | Not supported on the inspected storefront. Excluded from cycles. |
-| Related searches | Not supported. Excluded from cycles. |
-| Sorting UI | Absent. SORT-001 documents the absence contract. |
-| Barcode API | Not verified. UI scanner control is tested. |
-| Analytics, image search, crawler, accuracy | Out of scope for this suite. |
-
-## 18. How to run WLAC and Baer independently
+## 17. How to run WLAC and Baer independently
 
 From the repository root:
 
