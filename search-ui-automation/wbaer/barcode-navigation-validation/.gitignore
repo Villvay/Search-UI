@@ -1,8 +1,0 @@
-output/*
-!output/.gitkeep
-!output/sample_*
-output/run.log
-__pycache__/
-*.pyc
-.DS_Store
-.pytest_cache/

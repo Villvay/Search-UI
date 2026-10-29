@@ -107,7 +107,7 @@ search-ui-automation/wbaer/
 | **Analytics smoke** | `npm run test:analytics:smoke` | Chromium `desktop-1440`, **15** representative queries from the full analytics dataset × 3 modules |
 | **Full analytics** | `npm run test:analytics` | Chromium `desktop-1440`, **complete** analytics dataset (currently Non-SKU top **50**) × 3 modules |
 | **Batched analytics** | `npm run test:analytics:batched` | New SKU/Non-SKU top-50 dataset (**200** rows); **Browser/Viewport → all queries × 3 modules** on one page before next viewport |
-| **Barcode / QR navigation** | `npm run test:barcode-nav` | Playwright API: barcode → single PLP (`BARCODE-001`…); smoke = 10, regression = 50. Full Python dataset: `npm run test:barcode` |
+| **Barcode / QR navigation** | `npm run test:barcode-nav` | Playwright API: barcode → single PLP (`BARCODE-001`…); smoke = 10, regression = 50. Full Python dataset: [`barcode_navigation_validation/`](../../barcode_navigation_validation/) |
 
 Recommended tiers:
 
@@ -146,8 +146,7 @@ npx playwright test --grep @responsive
 | `SKU_LIMIT` | Cap unique SKUs loaded from the dataset |
 | `SKU_CACHE_SEQUENCES=0` | Disable A→B→C→A sequence expansion (run file order only) |
 | `ENV` / `BASE_URL` / `VERCEL_AUTOMATION_BYPASS_SECRET` / `VERCEL_AUTOMATION_BYPASS_SECRET_PROD` | Target app + protection bypass |
-| `ENVIRONMENT` / `BARCODE_API_URL` | Barcode API target for `test:barcode` (`qa` \| `prod`) |
-| `BARCODES_JSON_PATH` / `BARCODES_CSV_PATH` / `SKU_SET` | Barcode dataset overrides (`SKU_SET`: `all` \| `yes` \| `no`) |
+| `BARCODE_API_URL` | Optional barcode API override for `test:barcode-nav` |
 
 Examples:
 
@@ -236,9 +235,8 @@ SKU_LIMIT=5 ENV=qa npm run test:sku-plp
 npm run test:barcode-nav:smoke
 npm run test:barcode-nav
 
-# Full Python barcode suite (large dataset; optional, outside cycles)
-npm run test:barcode:sample
-npm run test:barcode
+# Full Python barcode suite lives at the repo root
+cd ../../barcode_navigation_validation && python3 run.py
 ```
 
 Runtime before/after measurements for the fast profiles live in [`reports/runtime-comparison.md`](./reports/runtime-comparison.md).

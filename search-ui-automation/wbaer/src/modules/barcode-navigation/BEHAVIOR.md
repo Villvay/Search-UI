@@ -34,8 +34,7 @@ npm run test:barcode-nav
 npm run test:barcode-nav -- --grep @smoke
 
 # Full Python suite (large dataset, not part of cycles)
-npm run test:barcode
-npm run test:barcode:sample
+cd ../../barcode_navigation_validation && python3 run.py
 ```
 
 ## Environment
