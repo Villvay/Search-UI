@@ -1,0 +1,19 @@
+export const FILTERS_FACETS_BEHAVIOR = {
+  searchPath: '/search',
+  queryParam: 'q',
+  filtersParam: 'filters',
+  appliesImmediately: true,
+  supportsMultiValueSameFacet: true,
+  supportsCrossFacetSelection: true,
+  supportsClearAll: true,
+  supportsIndividualClear: true,
+  uiSettleTimeoutMs: 30_000,
+} as const;
+
+export const FILTERS_FACETS_COPY = {
+  panelHeading: 'Filters',
+  mobileTrigger: /Filters\s*&\s*sort|^Filters$/i,
+  clearAll: /^Clear all$/i,
+  searchResultsHeadingPrefix: 'Search Results for',
+  noResultsHeading: 'No Results',
+} as const;
