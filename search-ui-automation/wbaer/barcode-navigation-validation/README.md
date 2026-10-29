@@ -2,7 +2,7 @@
 
 > **Search-UI integration:** Ported from `QA-Search-main/barcode_navigation_validation`.
 > Standalone suite (Python API) — **not** included in Playwright smoke/regression.
-> Run via `npm run test:barcode` / `npm run test:qr-code` from `search-ui-automation/`.
+> Run via `npm run test:barcode` / `npm run test:qr-code` from `search-ui-automation/wbaer/`.
 > Quick sample: `npm run test:barcode:sample` (uses `input/barcodes.csv`).
 > Default `npm run test:barcode` prefers `input/plp_redirect_ALL_skus.json` (~109k SKUs) when present.
 

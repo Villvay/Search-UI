@@ -2,7 +2,7 @@
 
 Playwright + TypeScript UI automation for the **Würth Louis & Company / Würth LAC** search experience.
 
-This project is independent of the Würth Baer suite in [`../search-ui-automation/`](../search-ui-automation/). It has its own configuration, selectors, test data, reports, and commands.
+This project is independent of the Würth Baer suite in [`../wbaer/`](../wbaer/). It has its own configuration, selectors, test data, reports, and commands.
 
 ## 1. Purpose
 
@@ -13,7 +13,7 @@ See [`FEATURE-MATRIX.md`](./FEATURE-MATRIX.md) for what was inspected on the liv
 ## 2. Folder structure
 
 ```text
-wurthlac/
+search-ui-automation/wlac/
 ├── config/                 # environments, viewports, selectors, cycles
 ├── src/core/               # SearchPage, SearchBox, dropdown, filters, fixtures
 ├── src/modules/            # feature modules (data / pages / assertions / tests)
@@ -33,7 +33,7 @@ wurthlac/
 ## 4. Installation
 
 ```bash
-cd wurthlac
+cd search-ui-automation/wlac
 cp .env.example .env
 npm install
 npx playwright install chromium
@@ -62,7 +62,7 @@ The suite refuses Würth Baer hosts so a missing override cannot silently run ag
 ## 7. Smoke
 
 ```bash
-cd wurthlac
+cd search-ui-automation/wlac
 npm run test:smoke
 ```
 
@@ -74,7 +74,7 @@ Responsive: `npm run test:smoke:responsive`
 ## 8. Regression
 
 ```bash
-cd wurthlac
+cd search-ui-automation/wlac
 npm run test:regression
 ```
 
@@ -108,7 +108,7 @@ npm run test:summary
 npm run report
 ```
 
-Artifacts stay under `wurthlac/reports/` and do not overwrite Baer reports.
+Artifacts stay under `search-ui-automation/wlac/reports/` and do not overwrite Baer reports.
 
 | Cycle | JSON | Dashboard | Text |
 |---|---|---|---|
@@ -175,6 +175,6 @@ npm run baer:regression
 Or from each project folder:
 
 ```bash
-cd wurthlac && npm run test:smoke
-cd search-ui-automation && npm run test:smoke
+cd search-ui-automation/wlac && npm run test:smoke
+cd search-ui-automation/wbaer && npm run test:smoke
 ```

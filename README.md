@@ -2,12 +2,12 @@
 
 Playwright + TypeScript automation for Würth search storefronts.
 
-This repository contains **two independent Search UI projects**:
+Search UI suites live under [`search-ui-automation/`](./search-ui-automation/):
 
 | Site | Project folder | Default host |
 |---|---|---|
-| Würth Baer Supply | [`search-ui-automation/`](./search-ui-automation/) | See that folder’s README |
-| Würth LAC / Louis & Company | [`wurthlac/`](./wurthlac/) | `https://wurthlac.com` |
+| Würth Baer Supply | [`search-ui-automation/wbaer/`](./search-ui-automation/wbaer/) | See that folder’s README |
+| Würth LAC / Louis & Company | [`search-ui-automation/wlac/`](./search-ui-automation/wlac/) | `https://wurthlac.com` |
 
 Do not run one suite against the other site. Reports and artifacts are isolated per folder.
 

@@ -1,7 +1,7 @@
 name: Search UI Regression
 
 # Manual full Search UI functional regression (not scheduled daily).
-# Independent jobs: Würth Baer (search-ui-automation) and Würth LAC (wurthlac).
+# Independent jobs: Würth Baer (search-ui-automation/wbaer) and Würth LAC (search-ui-automation/wlac).
 # Use after releases or major Search UI changes.
 # Uses existing cycle runners: npm run test:regression in each project folder.
 # Exit policy: unexpected failures fail; CACHE-005 known defect alone does not.
@@ -50,7 +50,7 @@ jobs:
     timeout-minutes: 120
     defaults:
       run:
-        working-directory: search-ui-automation
+        working-directory: search-ui-automation/wbaer
 
     steps:
       - name: Checkout
@@ -61,7 +61,7 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-          cache-dependency-path: search-ui-automation/package-lock.json
+          cache-dependency-path: search-ui-automation/wbaer/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -110,7 +110,7 @@ jobs:
 
       - name: Write GitHub Step Summary
         if: ${{ !cancelled() }}
-        working-directory: search-ui-automation
+        working-directory: search-ui-automation/wbaer
         env:
           REPORT_PATH: reports/search-ui-regression-report.json
           FALLBACK_ENV: ${{ github.event.inputs.environment || 'qa' }}
@@ -129,7 +129,7 @@ jobs:
             lines.push(`| Field | Value |`);
             lines.push(`| --- | --- |`);
             lines.push(`| Cycle | Regression |`);
-            lines.push('| Project | search-ui-automation (WBaer) |');
+            lines.push('| Project | search-ui-automation/wbaer |');
             lines.push(`| Environment | ${String(process.env.FALLBACK_ENV || 'qa').toUpperCase()} |`);
             lines.push(`| Responsive | ${process.env.RUN_RESPONSIVE === 'true' ? 'requested' : 'not run'} |`);
             lines.push(`| Final result | FAIL |`);
@@ -161,7 +161,7 @@ jobs:
           lines.push('| Field | Value |');
           lines.push('| --- | --- |');
           lines.push(`| Cycle | Regression |`);
-          lines.push('| Project | search-ui-automation (WBaer) |');
+          lines.push('| Project | search-ui-automation/wbaer |');
           lines.push(`| Environment | ${c.environment || String(process.env.FALLBACK_ENV || 'qa').toUpperCase()} |`);
           lines.push(`| Browser | ${c.browser || 'Chromium'} |`);
           lines.push(`| Projects | ${(c.projects || []).join(', ') || 'desktop-1440'} |`);
@@ -190,12 +190,12 @@ jobs:
           name: baer-search-ui-regression-reports${{ github.event.inputs.run_responsive == 'true' && '-responsive' || '' }}
           retention-days: 30
           path: |
-            search-ui-automation/reports/search-ui-regression-report.json
-            search-ui-automation/reports/search-ui-regression-summary.txt
-            search-ui-automation/reports/html/search-ui-regression-dashboard.html
-            search-ui-automation/reports/search-ui-summary.json
-            search-ui-automation/reports/search-ui-summary.md
-            search-ui-automation/reports/search-ui-playwright-results.json
+            search-ui-automation/wbaer/reports/search-ui-regression-report.json
+            search-ui-automation/wbaer/reports/search-ui-regression-summary.txt
+            search-ui-automation/wbaer/reports/html/search-ui-regression-dashboard.html
+            search-ui-automation/wbaer/reports/search-ui-summary.json
+            search-ui-automation/wbaer/reports/search-ui-summary.md
+            search-ui-automation/wbaer/reports/search-ui-playwright-results.json
           if-no-files-found: warn
 
       - name: Upload Playwright failure artifacts
@@ -204,7 +204,7 @@ jobs:
         with:
           name: baer-search-ui-regression-test-results${{ github.event.inputs.run_responsive == 'true' && '-responsive' || '' }}
           retention-days: 30
-          path: search-ui-automation/test-results/
+          path: search-ui-automation/wbaer/test-results/
           if-no-files-found: ignore
 
   wlac-regression:
@@ -214,7 +214,7 @@ jobs:
     timeout-minutes: 120
     defaults:
       run:
-        working-directory: wurthlac
+        working-directory: search-ui-automation/wlac
 
     steps:
       - name: Checkout
@@ -225,7 +225,7 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-          cache-dependency-path: wurthlac/package-lock.json
+          cache-dependency-path: search-ui-automation/wlac/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -254,7 +254,7 @@ jobs:
             BASE_URL_VALUE="${WLAC_BASE_URL_QA}"
           fi
           # Only export BASE_URL when a non-empty WLAC repo variable is set.
-          # Otherwise Playwright uses wurthlac/config/environments.ts
+          # Otherwise Playwright uses search-ui-automation/wlac/config/environments.ts
           # (qa default: https://wurthlac.com). Never reuse Baer BASE_URL vars.
           if [ -n "${BASE_URL_VALUE}" ]; then
             echo "base_url=${BASE_URL_VALUE}" >> "$GITHUB_OUTPUT"
@@ -283,13 +283,13 @@ jobs:
             unset BASE_URL || true
           fi
           echo "ENV=${ENV}"
-          echo "BASE_URL=${BASE_URL:-<default from wurthlac environments.ts>}"
+          echo "BASE_URL=${BASE_URL:-<default from wlac environments.ts>}"
           echo "HEADLESS=${HEADLESS}"
           npm run test:regression
 
       - name: Write WLAC GitHub Step Summary
         if: ${{ !cancelled() }}
-        working-directory: wurthlac
+        working-directory: search-ui-automation/wlac
         env:
           REPORT_PATH: reports/search-ui-regression-report.json
           FALLBACK_ENV: ${{ github.event.inputs.environment || 'qa' }}
@@ -309,7 +309,7 @@ jobs:
             lines.push('| Field | Value |');
             lines.push('| --- | --- |');
             lines.push('| Cycle | Regression |');
-            lines.push('| Project | wurthlac |');
+            lines.push('| Project | search-ui-automation/wlac |');
             lines.push(`| Environment | ${String(process.env.FALLBACK_ENV || 'qa').toUpperCase()} |`);
             lines.push('| Final result | FAIL |');
             if (runUrl) {
@@ -339,7 +339,7 @@ jobs:
           lines.push('| Field | Value |');
           lines.push('| --- | --- |');
           lines.push('| Cycle | Regression |');
-          lines.push('| Project | wurthlac |');
+          lines.push('| Project | search-ui-automation/wlac |');
           lines.push(`| Environment | ${c.environment || String(process.env.FALLBACK_ENV || 'qa').toUpperCase()} |`);
           lines.push(`| Browser | ${c.browser || 'Chromium'} |`);
           lines.push(`| Projects | ${(c.projects || []).join(', ') || 'desktop-1440'} |`);
@@ -364,12 +364,12 @@ jobs:
           name: wlac-search-ui-regression-reports
           retention-days: 30
           path: |
-            wurthlac/reports/search-ui-regression-report.json
-            wurthlac/reports/search-ui-regression-summary.txt
-            wurthlac/reports/html/search-ui-regression-dashboard.html
-            wurthlac/reports/search-ui-summary.json
-            wurthlac/reports/search-ui-summary.md
-            wurthlac/reports/search-ui-playwright-results.json
+            search-ui-automation/wlac/reports/search-ui-regression-report.json
+            search-ui-automation/wlac/reports/search-ui-regression-summary.txt
+            search-ui-automation/wlac/reports/html/search-ui-regression-dashboard.html
+            search-ui-automation/wlac/reports/search-ui-summary.json
+            search-ui-automation/wlac/reports/search-ui-summary.md
+            search-ui-automation/wlac/reports/search-ui-playwright-results.json
           if-no-files-found: warn
 
       - name: Upload WLAC Playwright failure artifacts
@@ -378,5 +378,5 @@ jobs:
         with:
           name: wlac-search-ui-regression-test-results
           retention-days: 30
-          path: wurthlac/test-results/
+          path: search-ui-automation/wlac/test-results/
           if-no-files-found: ignore

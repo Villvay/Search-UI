@@ -3,9 +3,9 @@
   "private": true,
   "description": "Root entry points for Würth Baer and Würth LAC Search UI automation projects",
   "scripts": {
-    "baer:smoke": "npm run test:smoke --prefix search-ui-automation",
-    "baer:regression": "npm run test:regression --prefix search-ui-automation",
-    "wlac:smoke": "npm run test:smoke --prefix wurthlac",
-    "wlac:regression": "npm run test:regression --prefix wurthlac"
+    "baer:smoke": "npm run test:smoke --prefix search-ui-automation/wbaer",
+    "baer:regression": "npm run test:regression --prefix search-ui-automation/wbaer",
+    "wlac:smoke": "npm run test:smoke --prefix search-ui-automation/wlac",
+    "wlac:regression": "npm run test:regression --prefix search-ui-automation/wlac"
   }
 }
