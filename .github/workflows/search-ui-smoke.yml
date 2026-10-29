@@ -20,8 +20,17 @@ on:
         options:
           - qa
           - production
+      suite:
+        description: 'Which project to run (scheduled daily runs always execute both)'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - wbaer
+          - wlac
       run_responsive:
-        description: 'Also run smoke across all six responsive viewports (optional; not daily default)'
+        description: 'Also run WBaer smoke across all six responsive viewports (optional; not daily default). WLAC smoke stays Chromium desktop.'
         required: false
         default: false
         type: boolean
@@ -34,8 +43,9 @@ permissions:
   contents: read
 
 jobs:
-  smoke:
-    name: Daily Smoke
+  baer-smoke:
+    name: WBaer Chromium Desktop Smoke
+    if: ${{ github.event_name == 'schedule' || (github.event.inputs.suite || 'both') != 'wlac' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     defaults:
@@ -87,9 +97,9 @@ jobs:
             echo "Using default base URL from environments.ts for ENV=${TARGET}"
           fi
           if [ "${{ github.event.inputs.run_responsive }}" = "true" ]; then
-            echo "artifact_name=search-ui-smoke-reports-responsive" >> "$GITHUB_OUTPUT"
+            echo "artifact_name=baer-search-ui-smoke-reports-responsive" >> "$GITHUB_OUTPUT"
           else
-            echo "artifact_name=search-ui-smoke-reports" >> "$GITHUB_OUTPUT"
+            echo "artifact_name=baer-search-ui-smoke-reports" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Run Search UI smoke cycle
@@ -175,9 +185,9 @@ jobs:
           const path = process.env.REPORT_PATH;
           const out = process.env.GITHUB_STEP_SUMMARY;
           const runUrl = process.env.RUN_URL || '';
-          const artifact = process.env.ARTIFACT_NAME || 'search-ui-smoke-reports';
+          const artifact = process.env.ARTIFACT_NAME || 'baer-search-ui-smoke-reports';
           const lines = [];
-          lines.push('## Search UI Smoke Cycle');
+          lines.push('## WBaer Search UI Smoke Cycle');
           if (!fs.existsSync(path)) {
             lines.push('');
             lines.push('Report artifact missing — cycle may have failed before report generation.');
@@ -185,6 +195,7 @@ jobs:
             lines.push('| Field | Value |');
             lines.push('| --- | --- |');
             lines.push('| Cycle | Smoke |');
+            lines.push('| Project | search-ui-automation (WBaer) |');
             lines.push(`| Environment | ${String(process.env.FALLBACK_ENV || 'qa').toUpperCase()} |`);
             lines.push(`| Responsive | ${process.env.RUN_RESPONSIVE === 'true' ? 'requested' : 'not run'} |`);
             lines.push('| Final result | FAIL |');
@@ -220,6 +231,7 @@ jobs:
           lines.push('| Field | Value |');
           lines.push('| --- | --- |');
           lines.push('| Cycle | Smoke |');
+          lines.push('| Project | search-ui-automation (WBaer) |');
           lines.push(`| Environment | ${c.environment || String(process.env.FALLBACK_ENV || 'qa').toUpperCase()} |`);
           lines.push(`| Browser | ${c.browser || 'Chromium'} |`);
           lines.push(`| Projects | ${(c.projects || []).join(', ') || 'desktop-1440'} |`);
@@ -263,6 +275,7 @@ jobs:
 
   wlac-smoke:
     name: WLAC Chromium Desktop Smoke
+    if: ${{ github.event_name == 'schedule' || (github.event.inputs.suite || 'both') != 'wbaer' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     defaults:
